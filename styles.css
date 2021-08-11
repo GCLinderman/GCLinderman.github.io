@@ -1,0 +1,62 @@
+@font-face {
+  font-family: "Computer Modern";
+  /* src: url('https://mirrors.ctan.org/fonts/cm-unicode/fonts/otf/cmunss.otf'); */
+}
+
+body {
+	width: 980px;
+	margin: 20px auto;
+	font-family: "Computer Modern", sans-serif;
+}
+
+
+h2 {
+	margin: 30px 0 5px 0 ;
+}
+
+.hidden
+{position:absolute;
+left:-10000px;  /*moves content off the visible screen*/
+top:auto; /*retain vertical position;
+          required by some browsers
+          for left positioning to work*/
+width:1px;
+height:1px;
+overflow:hidden; /*visually hide what doesn't fit 1x1 px*/
+}
+
+ul {
+list-style-type: none; padding-left: 0;
+}
+li {
+	margin: 10px 0;
+}
+
+li .icon {
+	margin-right: 5px;
+}
+
+#info img {
+	float: left;
+	margin: 0 50px 20px 0;
+}
+
+#contents {
+	clear: both;
+}
+#papers li a {
+text-decoration: none}
+
+#papers {margin-bottom: 50px}
+
+#wrap {
+   width:600px;
+   margin:0;
+   white-space:nowrap
+}
+
+#left_col {
+   display: inline-block;
+   width:300px;
+   vertical-align:top;
+}
