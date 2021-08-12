@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Low rank matrix error distributions</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/experimental/private/2018/09/30/low-rank-error-distribution.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Low rank matrix error distributions</h1>
+    <p class="post-meta">
+      <time datetime="2018-09-30T01:58:45-04:00" itemprop="datePublished">
+        
+        Sep 30, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<style>
+
+ summary::-webkit-details-marker {
+ color: #000000;
+ font-size: 125%;
+ margin-right: 2px;
+}
+summary:focus {
+	outline-style: none;
+}
+article > details > summary {
+	font-size: 28px;
+	margin-top: 16px;
+
+}
+summary{
+	font-style: italic;
+}
+details > p {
+	margin-left: 24px;
+}
+details details {
+	margin-left: 36px;
+}
+details details summary {
+	font-size: 16px;
+}
+
+pre.highlight {
+  max-height: 400px; /* Change to your desired max height */
+  overflow-y: scroll;
+}
+
+</style>
+
+<h2 id="general-low-rank-sparse-matrix">General low-rank sparse matrix</h2>
+<p>I generate a low-rank matrix with a large number of zeros, then set random
+elements to zero giving the measured martrix. Then, we find the low rank
+approximation, and plot the distribution of the elements corresponding to the
+original zeros. Below, I do it for ten replicates, but plot only the first four.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="c1">%% Simulate  Low Rank Expression Matrix (i.e. sparse, positive valued, low-rank)</span>
+<span class="c1">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="nb">clc</span><span class="p">;</span> <span class="nb">clear</span><span class="p">;</span> <span class="nb">close</span> <span class="nb">all</span>
+<span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">%Perhaps there are better ways to make a sparse, low rank matrix.  I did it by</span>
+<span class="c1">%setting its factors to be sparse.  Then removing rows/columns that are all</span>
+<span class="c1">%zeros, and repeating until the matrix is large enough.</span>
+<span class="n">ni</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">true_zeros_means</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">ni</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">;</span> <span class="n">n</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">;</span> <span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>  <span class="n">C</span><span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="n">factor_sparsity</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">;</span>
+<span class="n">M_original</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">while</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">M_original</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.75</span><span class="o">*</span><span class="n">m</span> <span class="o">||</span><span class="nb">size</span><span class="p">(</span><span class="n">M_original</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.75</span><span class="o">*</span><span class="n">m</span><span class="p">)</span>
+    <span class="n">M1</span> <span class="o">=</span> <span class="n">C</span><span class="o">*</span><span class="nb">rand</span><span class="p">(</span> <span class="n">m</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">C</span><span class="o">*</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">r</span><span class="p">);</span>
+
+    <span class="n">M1</span><span class="p">(</span><span class="nb">randperm</span><span class="p">(</span><span class="nb">numel</span><span class="p">(</span><span class="n">M1</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">factor_sparsity</span><span class="p">)))</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">M2</span><span class="p">(</span><span class="nb">randperm</span><span class="p">(</span><span class="nb">numel</span><span class="p">(</span><span class="n">M2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">factor_sparsity</span><span class="p">)))</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">M_original_pre</span> <span class="o">=</span> <span class="n">M1</span><span class="o">*</span> <span class="n">M2</span><span class="o">'</span><span class="p">;</span>
+    <span class="n">nonempty_rows</span> <span class="o">=</span> <span class="n">m</span><span class="o">&gt;</span> <span class="nb">sum</span><span class="p">(</span><span class="n">M_original_pre</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+    <span class="n">nonempty_cols</span> <span class="o">=</span> <span class="n">m</span><span class="o">&gt;</span> <span class="nb">sum</span><span class="p">(</span><span class="n">M_original_pre</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">M_original</span> <span class="o">=</span> <span class="n">M_original_pre</span><span class="p">(</span><span class="n">nonempty_rows</span><span class="p">,</span><span class="n">nonempty_cols</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="p">[</span><span class="n">m_final</span><span class="p">,</span> <span class="n">n_final</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">M_original</span><span class="p">);</span>
+<span class="p">[</span><span class="o">~</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="o">~</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">M_original</span><span class="p">);</span> 
+
+<span class="c1">%All the zeros in M_original are true zeros. Now, let's simulated dropout, and</span>
+<span class="c1">%perturb the matrix by setting many more elements to be zero.</span>
+<span class="n">missing_num</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">M_original</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nb">size</span><span class="p">(</span><span class="n">M_original</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mf">0.7</span><span class="p">);</span>
+<span class="n">M_missing</span> <span class="o">=</span> <span class="n">M_original</span><span class="p">;</span>
+<span class="n">M_missing</span><span class="p">(</span><span class="nb">randperm</span><span class="p">(</span><span class="nb">numel</span><span class="p">(</span><span class="n">M_original</span><span class="p">),</span> <span class="n">missing_num</span><span class="p">))</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> 
+
+<span class="c1">%"Complete" the matrix using SVD</span>
+<span class="p">[</span><span class="n">U</span> <span class="n">S</span> <span class="n">V</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">M_missing</span><span class="p">);</span>
+<span class="n">M_approx</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">S</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">V</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">'</span><span class="p">;</span>
+
+<span class="n">true_zeros_means</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">=</span> <span class="nb">mean</span><span class="p">(</span><span class="n">M_approx</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nb">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> 
+        <span class="nb">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="nb">i</span><span class="p">);</span>
+        <span class="nb">histogram</span><span class="p">(</span><span class="n">M_approx</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span> <span class="p">));</span> 
+        <span class="nb">title</span><span class="p">(</span><span class="nb">sprintf</span><span class="p">(</span><span class="s1">'%d x %d matrix, from %.2f to %.2f nnz\nmean %.4f'</span><span class="p">,</span><span class="n">m_final</span><span class="p">,</span><span class="n">n_final</span><span class="p">,</span><span class="nb">nnz</span><span class="p">(</span><span class="n">M_original</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span> <span class="nb">nnz</span><span class="p">(</span><span class="n">M_missing</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span><span class="n">true_zeros_means</span><span class="p">(</span><span class="nb">i</span><span class="p">)))</span>
+        <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'fontsize'</span><span class="p">,</span> <span class="mi">12</span><span class="p">);</span>
+
+    <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/low-rank-error/general_n1000_r10.png" alt="" /></p>
+
+<p>It looks quite symmetric around zero. You might also note that the shape of the
+distribution is not a Gaussian–it is very pointy. I thought it sort of looked
+like a Laplace distribution, but if I try to fit a Laplace to it, it did not
+seem to fit.</p>
+
+<p>However, it is not exactly around zero. I wrote the mean of the distribution in
+the title of each experiment, and you see that it is very small, and slightly
+positive. Indeed, if you run it 10 times, the means you get are all positive:</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">true_zeros_means</span> <span class="o">=</span>
+
+    <span class="mf">0.0236</span>
+    <span class="mf">0.0204</span>
+    <span class="mf">0.0258</span>
+    <span class="mf">0.0206</span>
+    <span class="mf">0.0215</span>
+    <span class="mf">0.0204</span>
+    <span class="mf">0.0205</span>
+    <span class="mf">0.0222</span>
+    <span class="mf">0.0193</span>
+    <span class="mf">0.0212</span>
+    <span class="mf">0.0185</span>
+    <span class="mf">0.0224</span>
+    <span class="mf">0.0173</span>
+    <span class="mf">0.0227</span>
+    <span class="mf">0.0219</span>
+    <span class="mf">0.0209</span>
+    <span class="mf">0.0241</span>
+    <span class="mf">0.0209</span>
+    <span class="mf">0.0196</span>
+    <span class="mf">0.0192</span>
+
+</code></pre></div></div>
+
+<p>So, perhaps it is only “roughly” symmetric around zero; there does appear to be some slight
+positive bias we had not considered before (as we were just eyeballing it).</p>
+
+<p>But in reality, that is not necessarily what we care about. That the distribution is
+symmetric around zero would be sufficient, but not necessary, for our imputation procedure
+(ALRA) to make sense.  The necessary and sufficient hypothesis for ALRA is that
+the error distribution of the true zeros at each row is upper bounded by the
+magnitude of the most negative element in that row. This is actually how we
+use ALRA: we threshold each row based on the magnitude of the smallest element.
+Taking one of the matrices above, let’s see how well this approach preserves
+the zeros.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mins</span> <span class="o">=</span> <span class="nb">repmat</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">M_approx</span><span class="p">,[],</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span><span class="n">n_final</span><span class="p">);</span>
+<span class="n">thresholded</span>  <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">M_approx</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mins</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+<span class="nb">sum</span><span class="p">(</span><span class="n">M_original</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;</span> <span class="n">thresholded</span> <span class="o">~=</span><span class="mi">0</span><span class="p">)/</span><span class="nb">sum</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1">%0.007</span>
+
+</code></pre></div></div>
+<p>Indeed, it performs extremely well. More than 99% of the zeros preserved by
+this procedure (this holds for all 10 experiments above).  Perhaps this is
+something easier to prove?</p>
+
+<p>In any case, here is how it looks for each row:</p>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="nb">clf</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">nroi</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span>
+    <span class="nb">subplot</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">nroi</span><span class="p">)</span>
+    <span class="n">roi</span> <span class="o">=</span> <span class="n">M_approx</span><span class="p">(</span><span class="n">nroi</span><span class="p">,:);</span>
+    <span class="n">histfit</span><span class="p">(</span><span class="n">roi</span><span class="p">(</span><span class="n">M_original</span><span class="p">(</span><span class="n">nroi</span><span class="p">,:)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="nb">title</span><span class="p">(</span><span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Row %d'</span><span class="p">,</span> <span class="n">nroi</span><span class="p">))</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+<p><img src="/~gcl22/blog/assets/low-rank-error/individual_rows.png" alt="" /></p>
+
+<p>You can see how thresholding based on the smallest number can give you &lt;1% error</p>
+
+<h2 id="boaz-example">Boaz’ example</h2>
+
+<p>Boaz constructed a rank-3 example,</p>
+
+<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_true.png" alt="" /></p>
+
+<p>with the following code, which I modified to be a bit more random</p>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="nb">clf</span><span class="p">;</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">;</span> 
+<span class="n">p</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span> 
+
+<span class="n">X</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">p</span><span class="p">);</span>  <span class="c1">% I view the rows as samples, columns as genes </span>
+<span class="n">u1</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="n">v1</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+<span class="n">u2</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="n">v2</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+<span class="n">u3</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="n">v3</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+
+<span class="n">n1</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span> <span class="n">p1</span><span class="o">=</span><span class="n">p</span><span class="p">/</span><span class="mi">2</span><span class="p">;</span>  
+<span class="n">u1</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">n1</span><span class="p">)</span> <span class="o">=</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+<span class="n">v1</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">p1</span><span class="p">)</span> <span class="o">=</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+
+<span class="n">n2</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">n1</span><span class="p">;</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">p</span> <span class="o">-</span> <span class="n">p1</span><span class="p">;</span> 
+<span class="n">u2</span><span class="p">(</span><span class="n">n1</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="k">end</span><span class="p">)</span> <span class="o">=</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="nb">rand</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+<span class="n">v2</span><span class="p">(</span><span class="n">p1</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="k">end</span><span class="p">)</span> <span class="o">=</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+
+<span class="n">u3</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> 
+<span class="n">idx_3</span> <span class="o">=</span> <span class="nb">floor</span><span class="p">(</span><span class="n">p</span><span class="p">/</span><span class="mi">3</span><span class="p">):</span><span class="nb">floor</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">/</span><span class="mi">3</span><span class="p">);</span> 
+<span class="n">v3</span><span class="p">(</span><span class="n">idx_3</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="nb">rand</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">idx_3</span><span class="p">));</span> 
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span> <span class="o">+</span> <span class="n">u1</span> <span class="o">*</span> <span class="n">v1</span><span class="s1">' + u2*v2'</span> <span class="o">+</span> <span class="n">u3</span> <span class="o">*</span> <span class="n">v3</span><span class="o">'</span><span class="p">;</span> 
+
+<span class="n">dropout_rate</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span> 
+<span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dropout_rate</span><span class="p">);</span>   <span class="c1">% Wij=1 means that entry is observed</span>
+<span class="n">Xt</span> <span class="o">=</span> <span class="n">X</span><span class="o">.*</span><span class="n">W</span><span class="p">;</span>  <span class="c1">% THIS IS THE OBSERVED MATRIX</span>
+
+<span class="p">[</span><span class="n">U0</span> <span class="n">S0</span> <span class="n">V0</span> <span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">X</span><span class="p">);</span> 
+<span class="p">[</span><span class="n">U</span> <span class="n">S</span> <span class="n">V</span> <span class="p">]</span><span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">Xt</span><span class="p">);</span>  <span class="c1">% matrix is U * S * V' ; so V(:,1) is the first right singular vector</span>
+<span class="n">S0</span> <span class="o">=</span> <span class="nb">diag</span><span class="p">(</span><span class="n">S0</span><span class="p">);</span> 
+<span class="n">S</span> <span class="o">=</span> <span class="nb">diag</span><span class="p">(</span><span class="n">S</span><span class="p">);</span> 
+
+<span class="c1">% reconstructed matrix from low rank svd, here we assume rank is known to</span>
+<span class="c1">% be 3 </span>
+<span class="n">Xr</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span> <span class="n">S</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(:,</span><span class="mi">1</span><span class="p">)</span><span class="s1">' + U(:,2)* S(2) * V(:,2)'</span> <span class="o">+</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(:,</span><span class="mi">3</span><span class="p">)</span><span class="o">'</span><span class="p">;</span> 
+
+<span class="n">ERR</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">Xr</span><span class="p">;</span> 
+<span class="n">ZERO_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="o">==</span><span class="mi">0</span><span class="p">);</span> 
+
+<span class="c1">% look at distribution of errors at a specific column c</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">ZERO_idx</span><span class="o">==</span><span class="mi">1</span><span class="p">);</span> 
+
+<span class="nb">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="nb">clf</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">nroi</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span>
+    <span class="nb">subplot</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">nroi</span><span class="p">)</span>
+    <span class="n">roi</span> <span class="o">=</span> <span class="n">Xr</span><span class="p">(</span><span class="n">nroi</span><span class="p">,:);</span>
+    <span class="n">histfit</span><span class="p">(</span><span class="n">roi</span><span class="p">(</span><span class="n">X</span><span class="p">(</span><span class="n">nroi</span><span class="p">,:)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="nb">title</span><span class="p">(</span><span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Row %d'</span><span class="p">,</span> <span class="n">nroi</span><span class="p">))</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>When looking at the error distributions for zeros in the entire matrix (as above), we see that it is nicely symmetric…and that the mean is actually slightly less than zero.
+<img src="/~gcl22/blog/assets/low-rank-error/boaz_distribution.png" alt="" /></p>
+
+<p>So, using a global threshold (i.e. not row-specific) with this matrix would
+work just fine; it would restore the zeros.</p>
+
+<p>However, when you look at the <strong>row-specific</strong> distribution of zero errors in
+the observed matrix, it is not symmetric. Row 6, for example, is particularly
+disastrous.</p>
+<pre><code class="language-MATLAB">for (nroi=1:10)
+    subplot(5,2,nroi)
+    roi = Xr(nroi,:);
+    histfit(roi(X(nroi,:) == 0))
+    title(sprintf('Row %d', nroi))
+    set(gca,'fontsize', 13);
+end
+
+</code></pre>
+<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_first_10.png" alt="" /></p>
+
+<p>So, if you try to threshold on each row, you do very poorly:</p>
+<pre><code class="language-MATLAB">mins = repmat(min(Xr,[],2), 1,p);
+Xrt  = max(Xr - abs(mins), 0);
+sum(X == 0 &amp; Xrt ~=0)/sum(X==0)
+% 0.489
+</code></pre>
+<p>However, as Boaz pointed out, it would work perfectly on the columns! Here are
+column-specific distribution of
+zero errors:</p>
+
+<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_first_10_cols.png" alt="" /></p>
+
+<p>Indeed, if you now threshold on each column, you do much better:</p>
+
+<pre><code class="language-MATLAB">mins = repmat(min(Xr,[],1), size(Xr,1),1);
+Xrt  = max(Xr - abs(mins), 0);
+sum(X == 0 &amp; Xrt ~=0)/sum(X==0)
+</code></pre>
+
+<p>We have to think more about why this asymmetry arises. Note that it is not
+simply because each row has a contribution from all three singular vectors
+whereas each column is only from a single one, because in my example matrix
+above, every row has a contribution from every singular vector and the
+distributions are very nice. Note also that something else different about this example is that the
+center columns of the true matrix have no zeros at all.</p>
+
+<p>That being said, I think it will be hard to prove the row-by-row thresholding
+works. It might be best to first focus  on global thresholding, which works fine in
+both of the above examples.</p>
+
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

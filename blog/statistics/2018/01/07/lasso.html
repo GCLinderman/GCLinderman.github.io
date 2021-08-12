@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>LASSO</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/statistics/2018/01/07/lasso.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">LASSO</h1>
+    <p class="post-meta">
+      <time datetime="2018-01-07T15:58:45-05:00" itemprop="datePublished">
+        
+        Jan 7, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <script type="text/javascript" src="http://livejs.com/live.js"></script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<style>
+
+ summary::-webkit-details-marker {
+ color: #000000;
+ font-size: 125%;
+ margin-right: 2px;
+}
+summary:focus {
+	outline-style: none;
+}
+article > details > summary {
+	font-size: 28px;
+	margin-top: 16px;
+
+}
+summary{
+	font-style: italic;
+}
+details > p {
+	margin-left: 24px;
+}
+details details {
+	margin-left: 36px;
+}
+details details summary {
+	font-size: 16px;
+}
+
+
+</style>
+
+<h2 id="sparsity">Sparsity</h2>
+
+<h3 id="subdifferential">Subdifferential</h3>
+
+<p>Suppose you are trying to minimize a convex function $h$ that is not
+differentiable.  For our purposes, let’s consider the absolute value function
+$h(x) = |x|$. It does not have a derivative at 0, so we cannot just set the
+derivative to zero and solve $x$ to minimize it. What does it mean to have a
+derivative at a point $x_0$, anyway? Essentially, it means that there is a
+unique tangent to the function $x_0$. For the absolute value, however, there is
+not a unique tangent at 0. In fact, there are an infinite number of tangents!
+Any line with slope in $[-1,1]$ just as good of a tangent as any other point.</p>
+
+<p>So, we define the subdifferential of a function at a point, to simply contain
+<em>all</em> of these tangents to that function at the given point.  More precisely
+for a convex function $h : \mathbb R \rightarrow \mathbb R$, the
+subdifferential is</p>
+
+<script type="math/tex; mode=display">\partial (h) (x_0) = \left\{ c \in \mathbb R \, \text{ s.t. }\, c\leq \frac{h(x) - h(x_0)}{x-x_0}, \forall x \in \mathbb R  \right\}.</script>
+
+<p>So, the subdifferential for the absolute value function, we have</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\partial h(x_0) =
+\begin{cases}
+1,  & \text{if $x_0 >0$ } \\[2ex]
+[-1,1],  & \text{if $x_0 =0$ } \\[2ex]
+-1,  & \text{if $x_0 <0$ } \\[2ex]
+\end{cases}. %]]></script>
+
+<p>As is seen in this example, for points at which the derivative of $h$ is
+defined, $\partial h$ contains only the value of the derivative. Where it is
+not defined, it is a set of slopes which are all tangent to the function at
+that point.</p>
+
+<p>Note that we can generalize this to higher dimenensions very easily. Consider a function $h : \mathbb R^n \rightarrow \mathbb R$, then</p>
+
+<script type="math/tex; mode=display">\partial (h) (x_0) = \left\{ g \in \mathbb R^n \, \text{ s.t. }\, h(x) \geq h(x_0) + g^T(x-x_0), \forall x \in \mathbb R  \right\}.</script>
+
+<p>If $n=1$ this is exactly the same as the earlier definition. Essentially, you
+are finding all hyperplanes which pass through $h(0)$ but lie below the
+function (i.e. tangents).</p>
+
+<p>How does this play into optimization? For a convex differentiable function, if
+the derivative is zero, then we have a global minimum. This is very intuitive;
+a convex function lies above its tangents, and if a tangent has slope zero,
+there is no way the function can get any smaller! So, for a convex
+subdifferentiable function, we have something very similar: if 0 is in the
+subdifferential, then we have a global minimum. Just because there are other
+tangents to the function at that point does not matter–as long as 0 is among
+them, the function has to lie above it, and hence that point is a minimum.</p>
+
+<h3 id="analytic-solution-for-lasso">Analytic solution for LASSO</h3>
+
+<p>With our definition of the subdifferential in hand, let’s try and find an
+analytic solution to the LASSO. We will deal with an easy case, where $X$ is
+only one column, $x$, which we will assume has unit norm.</p>
+
+<p>We need to minimize</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+f(b) &= \|y-Xb\|_2^2 + 2\lambda \|b\|_1\\
+ &= y^Ty + b^TX^TXb -2y^TXb+ 2 \lambda \|b \|_1\\
+ &= y^Ty + b^2 -2y^Txb+ 2 \lambda |b| 
+\end{align*} %]]></script>
+
+<p>First, we compute the subdifferential, with respect to $b$,</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\partial (f)(b) =
+\begin{cases}
+2b - 2x^Ty+2\lambda ,  & \text{if $b >0$ } \\[2ex]
+[-2\lambda,2\lambda] - 2x^Ty ,  & \text{if $b =0$ } \\[2ex]
+2b - 2x^Ty-2\lambda ,  & \text{if $b <0$ } \\[2ex]
+\end{cases}. %]]></script>
+
+<p>We need to find the $b$ such that $0 \in \partial(f)(b)$.  Let’s take it one case at a time:</p>
+
+<p><strong>Case 1 ($b &gt; 0$):</strong> We need $2b - 2x^Ty+2\lambda =0$, so we set $b = x^Ty - \lambda$. But $b&gt;0$, so $x^Ty &gt; \lambda&gt;0$. This means that if $b&gt;0$, then $x^Ty&gt;0$.</p>
+
+<p><strong>Case 2 ($b &lt; 0$):</strong> We need $2b - 2x^Ty-2\lambda =0$, so we set $b = x^Ty + \lambda$. But $b&lt;0$, so clearly, $-x^Ty &gt; \lambda&gt;0$. This means that if $b&lt;0$, then $x^Ty&lt;0$.</p>
+
+<p>We can combine these two cases nicely: if $b\neq 0$, then $b = x^Ty -
+sign(x^Ty)\lambda$. This works because if $b&gt;0$ then $sign(x^Ty) = +1$
+and we have $b = x^Ty -\lambda$, whereas if $b&lt;0$, then $sign(x^Ty) = -1$
+and $b = x^Ty + \lambda$.</p>
+
+<p>Note, also, that $b \neq 0 \Leftrightarrow \vert x^ty \vert &gt; \lambda $.</p>
+
+<p><strong>Case 3 ($b = 0$):</strong> We need $0 \in [-2\lambda,2 \lambda] - 2x^t y$. This just means that $x^ty \in [-\lambda,\lambda]$, or $\vert x^ty \vert &lt; \lambda$.</p>
+
+<p>So, we have our solution:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+b =
+\begin{cases}
+ 0 ,  & \text{if $|x^ty| < \lambda$ } \\[2ex]
+ x^Ty - sign(x^Ty)\lambda,  & \text{if $|x^ty| > \lambda$ } \\[2ex]
+\end{cases}. %]]></script>
+
+<p>Or more compactly,</p>
+
+<script type="math/tex; mode=display">b = \left(1-\frac{\lambda}{|x^Ty|} \right)_+ x^Ty.</script>
+
+<p>Note that the ordinary least squared solution would have been $b=x^Ty$. So, it is clear why LASSO is called a “shrinkage” method.</p>
+
+<p>http://statsmaths.github.io/stat612/lectures/lec17/lecture17.pdf</p>
+
+<h3 id="coordinate-descent-for-lasso">Coordinate Descent for LASSO</h3>
+
+<p>Although we cannot get a closed form solution to multidimensional LASSO, we can
+still obtain the solution numerically. One popular algorithm is called
+“coordinate descent” which we describe here.</p>
+
+<p>Recall that we are trying to minimize</p>
+
+<script type="math/tex; mode=display">f(b) = \|y-Xb\|_2^2 + 2\lambda \|b\|_1\\</script>
+
+<p>where $X\in \mathbb R^{N \times p}$, $b\in \mathbb R^p$, and $y\in \mathbb R^N$.</p>
+
+<p>First, initialize $b$ as zero. Then, for each dimension $i$,</p>
+<ol>
+  <li>
+    <p>Compute the residual $r_i \in \mathbb R^N$, $r_i = y_i - \sum_{i \neq j} X_jb_j$.</p>
+  </li>
+  <li>
+    <p>Now, solve the following 1-dimensional LASSO,</p>
+
+    <script type="math/tex; mode=display">\| r_i - X_ib_i\|_2 + \lambda \vert b_i \vert,</script>
+
+    <p>using the the closed form from above,</p>
+  </li>
+</ol>
+
+<script type="math/tex; mode=display">b_i = \left(1-\frac{\lambda}{|X_i^Tr_i|} \right)_+ X_i^Tr_i.</script>
+
+<p>Then, repeat this entire process until convergence.</p>
+
+<p>https://varao.github.io/stat598z_fall17/lect17.pdf</p>
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

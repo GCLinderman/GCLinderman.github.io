@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Spectral Theorem for Compact Operators</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/jekyll/update/2018/01/07/compact-operators-spectral-theorem.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Spectral Theorem for Compact Operators</h1>
+    <p class="post-meta">
+      <time datetime="2018-01-07T15:58:45-05:00" itemprop="datePublished">
+        
+        Jan 7, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <script type="text/javascript" src="http://livejs.com/live.js"></script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<h2 id="compactness">Compactness</h2>
+<p>In a metric space, it is equivalent for a set to be <strong>compact</strong> and <strong>sequentially compact</strong>. Let $X$ be a metric space equipped with a distance function $d (\cdot, \cdot )$.</p>
+
+<h3 id="compact">Compact</h3>
+<p><span class="definition">
+A set is <strong>compact</strong> if every cover has a finite subcover.
+</span>
+<span class="proposition">
+If $ B $ is compact, then it is closed and bounded.
+</span>
+<span class="proof">
+Assuming $ B $ is compact, we first prove its complement  is open. Consider a
+point $ p \in B^c $, and define an open cover $U_n = \{ q : d(p,q) &gt;
+\frac{1}{n} \}$. Note that these sets are nested: $U_1 \subset U_2 \subset …
+$, and because $\{ U_n \}$ covers $B$, there is a finite subcover. That is,
+there exists some $m$ such that $B \subset U_m$. Therefore, $N_{(1/m)}(p) \in
+B^c$, proving that $B^c$ is open, which gives that $B$ is closed. <br /><br />
+Now we prove that $B$ is bounded. This can be seen by letting $\{V_n \}$ be a
+cover for $B$ defined by $V_n = N_n(p)$ for any point $p \in B$. This cover is also nested, and it has a finite subcover, so there exists some $m$ for which $B \subset N_m(p)$, meaning that $B$ is bounded.
+</span></p>
+
+<p>So, when do we get the other direction? In $\mathbb{R}^n$, we have it in
+<strong>Heine-Borel</strong>:
+<span class="theorem">
+A subset of $\mathbb{R^n}$ or $\mathbb{C^n}$ that is closed and bounded is compact.
+</span></p>
+
+<p>What is it about Euclidean space that gives us this very nice result?  First,
+is <em>completeness</em>. For example, let our space be $\mathbb{Q}$ with the usual
+metric. $\mathbb{Q} \cap [0,1]$ is bounded and closed in $\mathbb{Q}$, but not
+compact.</p>
+
+<p>Second, is that it is finite. In a finite dimensional space, every bounded set
+is totally bounded, meaning that it can be covered by finitely many subsets of
+every fixed size. In an infinite dimensional space, that is not necessarily true.</p>
+
+<p>Well, we can generalize it to arbitrary metric spaces by strengthening
+<em>boundedness</em> to <em>total boundedness</em> and <em>closedness</em> to <em>completeness</em>.</p>
+
+<p><span class="theorem">
+A subset of $X$ that is complete and totally bounded is compact.
+</span></p>
+
+<p>In some very useful metric spaces, however, there are closed and bounded sets
+which are not compact (e.g. for a Hilbert space example, see
+<a href="https://matthewhr.wordpress.com/2013/01/25/compactness-and-infinite-dimensional-hilbert-spaces/">here</a>).</p>
+
+<h3 id="sequentially-compact">Sequentially Compact</h3>
+<p><span class="definition">
+A set is <strong>sequentially compact</strong> if every sequence has a convergent subsequence.
+</span>
+As mentioned above, 
+<span class="theorem">
+A subset of a metric space is compact if and only if it is sequentially compact.
+</span></p>
+
+<p>Bolzano-Weierstrass
+<span class="theorem">
+Any closed or bounded set of $\mathbb{R}^n$ or $\mathbb{C}^n$  is sequentially compact.
+</span></p>
+
+<p>Because of the equivalence between compactness and sequential compactness in a
+metric space, Heine-Borel and Bolzano-Weierstrass are equivalent.</p>
+
+<h2 id="compact-operators">Compact Operators</h2>
+<p>We begin by recalling the definition of a compact operator</p>
+
+<p><span class="definition">
+A linear transformation $T : \mathscr{K} \rightarrow \mathscr{K}$ is compact if
+$T ( \text{ball } \mathscr{H} )$ has compact closure in $\mathscr{K}$.
+</span></p>
+
+<h2 id="spectral-theorem-for-compact-operators">Spectral Theorem for Compact Operators</h2>
+<p><span class="theorem">
+If T is a compact self-adjoint operator on $\mathscr H$, then T has only a
+countable number of distinct eigenvalues. If $\{\lambda_1, \lambda_2,…\}$
+are the distinct nonzero eigenvalues of $T$, and $P_n$ is the projection of
+$\mathscr H$ onto $\text{ker} ( T-\lambda_n)$, then $P_n P_m = P_m P_n = 0$ if
+$n\neq m$, each $\lambda_n$ is real, and $T = \sum_{n=1}^\infty \lambda_nP_n
+$.
+</span></p>
+
+<p>First, we will need the following proposition:</p>
+
+<p><span class="definition">
+$\mathscr M$ is an invariant subspace for $T$ if $T\mathscr M \subset M$.
+$\mathscr M$ is a reducing subspace for $T$ if $\mathscr M $ and $\mathscr
+M^\perp$ are both invariant subspaces for $T$.
+</span>
+<span class="proposition">
+If $\mathscr M$ is invariant for both $T$ and $T^*$, then $\mathscr M$ is a reducing subpsace for $T$. 
+</span></p>
+
+<p>To see this, let $x \in \mathscr M$ and  $y\in \mathscr M^\perp$.  $\langle x, Ty \rangle = \langle T^*x,y \rangle = 0$</p>
+
+<p><span class="proposition">
+If $A$ is a normal operator and $\lambda \in \mathbb F$, then $\text{ker}(A-\lambda) = \text{ker}(A - \lambda)^*$ and $\text{ker}(A-\lambda)$ is a reducing subspace for $A$.
+</span></p>
+
+<p>Since $A$ is normal, so is $A-\lambda$. Note that $\|(A-\lambda)h\| = \|(A^*
+-\lambda)h\|$ because they are normal operators. To see this, let $B=(A-\lambda)$.</p>
+
+<script type="math/tex; mode=display">\| Bh \|^2 = \langle Bh, Bh \rangle = \langle B^*Bh, h \rangle = \langle
+BB^* h, h \rangle = \langle B^*h, B^*h\rangle = \|B^* h\|^2</script>
+
+<p>Therefore, $\|(A-\lambda)h\| = \|(A^* - \lambda)h\|$, meaning that
+$\ker(A-\lambda) =\ker(A^* -\lambda)$.  Now, need to prove that $x\in
+\ker(A-\lambda) \rightarrow Ak \in \ker(A - \lambda)$. This is because $Ax =
+\lambda x \in \ker(A-\lambda)$. The exact same argument shows that $\ker(A^*
+-\lambda)$ invariant, meaning that these $\ker(A-\lambda)$ reduces $\mathscr
+H$. 
+<span class="proposition">
+Eigenspaces corresponding to different eigenvalues of a normal operator are orthogonal. 
+</span>
+Let $g \in \ker(A-\lambda)$ and $h \in \ker(A-\mu)$ and note that</p>
+
+<script type="math/tex; mode=display">\lambda \langle g, h \rangle  =  \langle \lambda g, h \rangle  = \langle Ag, h \rangle= \langle g,A^*h \rangle = \langle g, \overline{\mu} h \rangle = \mu \langle g, h \rangle</script>
+
+<p>So $(\lambda - \mu) \langle h,g\rangle = 0$, and $\lambda \neq \mu$, giving the proposition.</p>
+
+<p><span class="proposition">
+Eigenvalues of self-adjoint operator $A$ are real
+</span>
+This can simply be seen for any $h$ such that $Ah=\lambda h$,  we have $\lambda h  =Ah =  A^* h = \overline \lambda h$</p>
+
+<p><span class="proposition">
+If $T= T^*$, then $\sup \{ \langle Th, h \rangle : \|h\| = 1 \} = \|T\|$.
+</span></p>
+
+<!-- 
+Let $M = \sup \\{ \langle Th_n, h_n \rangle : \\|h\\| = 1 \\}$, and note that
+$M \leq \\| T \\|$ giving us one direction. To prove that $M \geq \\| T \\|$,
+we let $\\|h\\| = \\|g\\| = 1$ and consider 
+
+$$
+\begin{align*}
+\langle A(h \pm g), h\pm g \rangle = \langle Ah, h \rangle \pm \langle
+\end{align*}
+$$
+-->
+
+<p>Our main tool in proving the spectral theorem is
+the following:</p>
+
+<p><span class="proposition">
+If $T$ is a compact self-adjoint operator, either $\pm \|T\|$ is an eigenvalue for $T$.
+</span>
+By the preceding proposition, there exists a sequence of unit vectors
+$\{h_n\}$ such that $\langle Th_n, h_n \rangle \rightarrow |T| = \lambda =
+| T |$. You might have to take a subsequence to ensure convergence, which
+will always work on this compact operator. Now, lets prove $\lambda$ is an eigenvalue:</p>
+
+<script type="math/tex; mode=display">0 \leq \| (T-\lambda)h_n\|^2 = \| T \|^2 - 2 \lambda \langle Th_n, h_n \rangle +\lambda^2 \rightarrow 0</script>
+
+<p>By proposition 4.14, $\lambda$ is an eigenvalue.</p>
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

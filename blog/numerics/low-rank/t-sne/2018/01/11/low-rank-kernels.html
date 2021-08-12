@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Low Rank Approximation of Kernels</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Low Rank Approximation of Kernels</h1>
+    <p class="post-meta">
+      <time datetime="2018-01-11T00:00:00-05:00" itemprop="datePublished">
+        
+        Jan 11, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/style.css" />
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-111570395-1"></script>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-111570395-1');
+</script>
+
+<script type="text/javascript" src="https://livejs.com/live.js"></script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<p>In our <a href="https://arxiv.org/abs/1712.09005">paper</a>, titled “Efficient Algorithms
+for t-distributed Stochastic Neighborhood Embedding”, we present an
+interpolation scheme for computing the gradient at each iteration of t-SNE. For
+a numerical analyst, the methods are completely standard, but may be foreign to
+people without much experience in numerical methods. In this post, I present
+some background about these numerical methods, with a great emphasis being
+placed on intuition.</p>
+
+<p>The code in this post is not numerically stable nor optimized; it is only for demonstration
+purposes. Our actual implementation is available <a href="https://github.com/KlugerLab/FIt-SNE">here</a>.</p>
+<h2 id="the-problem">The Problem</h2>
+
+<p>Suppose we have $n$ points $\{x_1,…,x_n\}\subset X$ and $m$ points $\{y_1,…,y_m\} \subset Y$, a kernel $K: X \times Y \rightarrow \mathbb R$, and we are interested in computing the following sum, for $i=1,…,n$.</p>
+
+<script type="math/tex; mode=display">f(x_i) = \sum_j K(x_i,y_j) q(y_j)</script>
+
+<p>Computed naively, the sums would take $n\cdot m$ time, which is prohibitive for large $n,m$.</p>
+
+<p>Suppose we know that $K$ was low-rank, that is, there are basis functions $u_l:X\rightarrow \mathbb R$ and $v_l: Y \rightarrow \mathbb R$ for $l=1,…,k$ such that</p>
+
+<script type="math/tex; mode=display">K(x,y) \approx \sum_l u_l(x)v_l(y)\sigma_l</script>
+
+<p>Now, just plugging in:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+f(x_i) &\approx \sum_j \sum_l u_l(x_i)v_l(y_j)\sigma_l q(y_j) \\
+ &= \sum_l u_l(x_i)\sigma_l \sum_j v_l(y_j)q(y_j) \\ 
+ &= \sum_l u_l(x_i)\sigma_l m_l
+\end{align} %]]></script>
+
+<p>Note that $m_l$ is only computed once for all $i$, meaning that the sums can be computed in $k(m+n)$ computations–a dramatic improvement over $m\cdot n$!</p>
+
+<p>In other words, supposing we had the $u_l, v_l$, the computation of this sum would be as follows:</p>
+
+<p><strong>Step 1</strong>: Compute $m_l = \sum_j v_l(y_j)q(y_j)$ for each $l=1,…,k$
+<br />
+<strong>Step 2</strong>: Compute $f(x_i) \approx \sum_l u_l(x_i)\sigma_l m_l$ for $ i=1,…,n$</p>
+
+<p>Clearly, it is highly desirable to find functions $u_l,v_l$. When is this possible? And what kind of functions will work?</p>
+
+<h2 id="optimal-approximation-with-svd">Optimal Approximation with SVD</h2>
+
+<p>Before we answer this, let’s reformulate the above sums in terms of matrix
+multiplications, by assuming $X,Y \subset \mathbb R$, $q\in \mathbb R^m$, and
+$K \in \mathbb R^{n\times m}$. The goal is to compute the vector $f \in \mathbb
+R^n$:</p>
+
+<script type="math/tex; mode=display">f = Kq</script>
+
+<p>We know from the Eckart-Young-Minsky theorem that the optimal (in terms of L2 and Frobenius norm) approximation to $K$ is the Singular Value Decomposition (SVD):</p>
+
+<script type="math/tex; mode=display">K \approx U\Sigma V^T</script>
+
+<p>where $U\in \mathbb R^{m \times k}$ with orthonormal columns $u_1,…,u_k$, $V \in \mathbb
+R^{n\times K}$ with orthonormal columns $v_1,…,v_k$, and diagonal matrix
+$\Sigma \in \mathbb R^{K \times K}$ with $\sigma_1,…,\sigma_k$ along the
+diagonal.</p>
+
+<p>Let’s use the SVD to compute a low-rank approximation to the following two kernels, $K_1$ and $K_2$:</p>
+
+<script type="math/tex; mode=display">K_1(x,y) = \frac{1}{1+\|x-y\|^2} \qquad K_2(x,y) = \frac{1}{\|x-y\|^2}</script>
+
+<p>Notice that $K_1$, which is the Cauchy kernel (and the one we deal with in the
+paper), does not go towards infinity when $x$ approaches $y$. On the other
+hand, $K_2$ approaches infinity when $x$ approaches $y$, and hence, we will see
+that for near field interactions, it is not low rank.</p>
+
+<p>Let’s demonstrate in MATLAB by generating random points on the unit interval. Here, $X=Y$, that is, all points interact with all points.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+<span class="p">[</span><span class="n">locs</span><span class="p">,</span><span class="o">~</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sort</span><span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">));</span>
+<span class="n">distmatrix</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">locs</span><span class="p">));</span>
+<span class="n">kernel1</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="n">distmatrix</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span> 
+<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="n">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+
+<span class="p">[</span><span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">V1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel1</span><span class="p">);</span> 
+<span class="p">[</span><span class="n">U2</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">V2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel2</span><span class="p">);</span> 
+<span class="nb">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S1</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span> <span class="nb">hold</span> <span class="n">on</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S2</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span>
+<span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Spectra of Kernels: Neear Field Interactions'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/low-rank-kernels/spectra.png" alt="Spectra" /></p>
+
+<p>Note how the singular values of $K_1$ decay immediately to zero, whereas $K_2$ decays from $10^{12}$
+to $10^9$. This is what we mean by low-rank kernel: the matrix $K$ is a linear
+combination of very few vectors.  Now, let’s compute the relative error as $\|
+USV^Tq - f\|/\|f\|$ for both of these kernels as a function of $k$.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q</span> <span class="o">=</span> <span class="nb">sin</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">locs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">cos</span><span class="p">(</span><span class="mi">2000</span><span class="o">*</span><span class="n">locs</span><span class="p">);</span> <span class="c1">%Anything could be used here</span>
+
+<span class="c1">%Exact </span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">kernel1</span><span class="o">*</span><span class="n">q</span><span class="p">;</span>
+<span class="n">f2</span> <span class="o">=</span> <span class="n">kernel2</span><span class="o">*</span><span class="n">q</span><span class="p">;</span>
+
+<span class="n">ks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">20</span> <span class="mi">100</span> <span class="mi">200</span><span class="p">];</span>
+<span class="n">K1_svd_errors</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">ks</span><span class="p">),</span><span class="mi">1</span><span class="p">);</span> <span class="n">K2_svd_errors</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">ks</span><span class="p">),</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">ki</span> <span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">ks</span><span class="p">),</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">ks</span><span class="p">(</span><span class="n">ki</span><span class="p">);</span>
+    <span class="n">kernel1_approx</span> <span class="o">=</span> <span class="n">V1</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">S1</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">V1</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span><span class="o">'</span><span class="p">;</span>
+    <span class="n">f1_approx</span> <span class="o">=</span> <span class="n">kernel1_approx</span><span class="o">*</span><span class="n">q</span><span class="p">;</span>
+    <span class="n">K1_svd_errors</span><span class="p">(</span><span class="n">ki</span><span class="p">)</span> <span class="o">=</span> <span class="nb">norm</span><span class="p">(</span><span class="n">f1_approx</span> <span class="o">-</span> <span class="n">f1</span><span class="p">)/</span><span class="nb">norm</span><span class="p">(</span><span class="n">f1</span><span class="p">);</span>
+    
+    <span class="n">kernel2_approx</span> <span class="o">=</span> <span class="n">V2</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">S2</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">V2</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">)</span><span class="o">'</span><span class="p">;</span>
+    <span class="n">f2_approx</span> <span class="o">=</span> <span class="n">kernel2_approx</span><span class="o">*</span><span class="n">q</span><span class="p">;</span>
+    <span class="n">K2_svd_errors</span><span class="p">(</span><span class="n">ki</span><span class="p">)</span> <span class="o">=</span> <span class="nb">norm</span><span class="p">(</span><span class="n">f2_approx</span> <span class="o">-</span> <span class="n">f2</span><span class="p">)/</span><span class="nb">norm</span><span class="p">(</span><span class="n">f2</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="nb">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="nb">clf</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="n">ks</span><span class="p">,</span><span class="n">K1_svd_errors</span><span class="p">,</span><span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="nb">hold</span> <span class="n">on</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="n">ks</span><span class="p">,</span><span class="n">K2_svd_errors</span><span class="p">,</span><span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="nb">ylabel</span> <span class="p">(</span><span class="s1">'Relative error'</span><span class="p">);</span> <span class="nb">xlabel</span><span class="p">(</span><span class="s1">'k'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Optimal Rank-k Approximation: Near Field'</span><span class="p">);</span>
+<span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> 
+</code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/low-rank-kernels/svd_error.png" alt="Optimal error" /></p>
+
+<p>With &lt;20 vectors, we can approximate $K_1$ to machine precision, but not the
+case for $K_2$, we can only get about 3 digits, which can be seen by taking the
+log of the condition number as $\log(10^{12}/10^9)$ =3.</p>
+
+<p>The problem with $K_2$ is that it explodes to infinity for points that are too
+close. Indeed, if the interaction of well-separated points is being calculated,
+then $K_2$ is also low rank.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">b1</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> 
+<span class="n">a2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">b2</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+<span class="p">[</span><span class="n">locs1</span><span class="p">,</span><span class="o">~</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sort</span><span class="p">((</span><span class="n">b1</span><span class="o">+</span><span class="n">a1</span><span class="p">)/</span><span class="mi">2</span><span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b1</span><span class="o">-</span><span class="n">a1</span><span class="p">));</span>
+<span class="p">[</span><span class="n">locs2</span><span class="p">,</span><span class="o">~</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sort</span><span class="p">((</span><span class="n">b2</span><span class="o">+</span><span class="n">a2</span><span class="p">)/</span><span class="mi">2</span><span class="o">+</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b2</span><span class="o">-</span><span class="n">a2</span><span class="p">));</span>
+
+<span class="n">distmatrix</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">([</span><span class="n">locs1</span><span class="p">;</span> <span class="n">locs2</span><span class="p">]));</span>
+<span class="n">kernel1</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="n">distmatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1001</span><span class="p">:</span><span class="mi">2000</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span> 
+<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1001</span><span class="p">:</span><span class="mi">2000</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="n">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="p">[</span><span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">V1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel1</span><span class="p">);</span> 
+<span class="p">[</span><span class="n">U2</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">V2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel2</span><span class="p">);</span> 
+<span class="nb">figure</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S1</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span> <span class="c1">%xlim([0,500]);</span>
+ <span class="nb">hold</span> <span class="n">on</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S2</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span><span class="c1">%xlim([0,500]);</span>
+<span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Spectrum of kernels'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
+</code></pre></div></div>
+<p><img src="/~gcl22/blog/assets/low-rank-kernels/spectra_well_sep.png" alt="Optimal error well separated" /></p>
+
+<p>If we were interested in approximating $K_2$, then we could use a fast
+multipole method (FMM), which treats the interaction between points close to
+eachother (near field) differently that points far from eachother (far field).
+In the near field, the interactions are directly computed, whereas in the
+far field, they are approximated.  For example, check out the Black Box FMM of
+Fong and
+Darve (<a href="https://www.sciencedirect.com/science/article/pii/S0021999109004665">paper</a>).</p>
+
+<p>But for t-SNE, we need to approximate $K_1$, which is low rank for all
+interactions, and hence we don’t need that kind of machinery. We can use the
+same approximation for all interactions.</p>
+
+<h2 id="polynomial-interpolation">Polynomial Interpolation</h2>
+<p>The SVD gives the optimal low-rank approximation,
+as it gives a basis for $X$ and $Y$ that is specific to $K$, but it is
+unfortunately not practical in this setting.  Forming the matrix $K$ is itself
+an $m\cdot n$ operation, which is prohibitive even before we start to compute the
+SVD.</p>
+
+<p>Instead, we will use polynomial interpolation. Fix $y_0$, and consider $f(x) = K(x,y_0)$,
+which is only a function of x. Let $\{x_1’,…,x_k’\}$  be points
+on the interval containing $X$, which we call interpolation points. We will now
+construct a $k$th-degree polynomial $L(x)$ such that $L(x_i’) = f(x_i’)$ for $i=1,…,k$</p>
+
+<script type="math/tex; mode=display">L(x) = \sum_l f(x_l')u_l(x)</script>
+
+<p>which is a linear combination of Lagrange basis polynomials</p>
+
+<script type="math/tex; mode=display">u_l(x) = \prod_{\substack{j=1\\j\neq l}}^{k} \frac{(x-x_{j}') }{(x_l'-x_{j}')}.</script>
+
+<p>The trick here is that $u_i(x_j’) = 1$ for $i=j$, but is zero otherwise.
+Therefore, $L$ will equal $f$ at each of the interpolation points. Similarly,
+we define interpolation points $\{y_1’,…,y_k’\}$ for $Y$, and Lagrange
+basis polynomials $v_l(x)$ for $l=1,…,k$.  With these basis polynomials, we can compute $f$ as</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+f(x_i) &= \sum_j K(x_i,y_j) q(y_j)\\
+&\approx \sum_j \sum_l u_l(x_i) K(x_l,y_j) q(y_j)\\
+&\approx \sum_j \sum_l \sum_t u_l(x_i) v_t(y_j)K(x_l,y_t) q(y_j)\\
+&= \sum_l u_l(x_i) \sum_t K(x_l,y_t) \sum_j v_t(y_j)q(y_j)\\
+\end{align} %]]></script>
+
+<p>It can be easily seen that this is also a matrix factorization. Let
+$u_i=\left[u_i(x_1), u_i(x_2),…,u_i(x_m)\right]^\top$ and $v_i=\left[v_i(x_1),
+v_i(x_2),…,v_i(x_n)\right]^\top$ for $i=1,…,k$. Concatenate these into
+an $m \times k$ matrix $U$ and $n \times k$ matrix $V$, respectively. Now define a $k \times k$ matrix $S$, with $S_{i,j} = K(x_i,x_j)$ for $i,j=1,…,k$, and we have</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+USV^Tq &=
+\begin{pmatrix}
+\Rule{1px}{.6em}{.6em}         & \Rule{1px}{.6em}{.6em}  &   & \Rule{1px}{.6em}{.6em}      \\
+u_1 				& u_2  			 & \cdots & u_p  \\
+\Rule{1px}{.6em}{.6em}         & \Rule{1px}{.6em}{.6em} &   & \Rule{1px}{.6em}{.6em}      \\
+\end{pmatrix}
+\begin{pmatrix}
+S_{1,1} & S_{1,2} & \cdots & S_{1,p}\\
+S_{2,1} & S_{2,2} & \cdots & S_{2,p}\\
+\vdots & \vdots & \ddots& \vdots\\
+S_{p,1} & S_{p,2} & \cdots & S_{p,p}\\
+\end{pmatrix}
+\begin{pmatrix}
+\Rule{1cm}{.5px}{0.5px} & v_1 & \Rule{1cm}{0.5px}{0.5px}\\
+\Rule{1cm}{0.5px}{0.5px} & v_2 & \Rule{1cm}{0.5px}{0.5px}\\
+& \vdots & \\
+\Rule{1cm}{0.5px}{0.5px} & v_p & \Rule{1cm}{0.5px}{0.5px}\\
+\end{pmatrix}
+\begin{pmatrix}
+q_1 \\
+q_2\\
+\vdots\\
+q_n
+\end{pmatrix} \\
+&\approx  Kq\\
+&=f
+\end{align} %]]></script>
+
+<p>Let’s try it with our kernel $K_1$ from above. Note that this kernel is symmetric, so $u_i = v_i$, and $U=V$.</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ps</span> <span class="o">=</span> <span class="mi">1</span><span class="p">:</span><span class="mi">15</span><span class="p">;</span>
+<span class="n">K1_poly_errors</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">ps</span><span class="p">),</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="c1">%With varying number of interpolation points</span>
+<span class="k">for</span> <span class="nb">pi</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)/</span><span class="n">ps</span><span class="p">(</span><span class="nb">pi</span><span class="p">);</span> <span class="c1">% Distance between interpolation points</span>
+    <span class="n">interp_points</span> <span class="o">=</span> <span class="n">a</span><span class="p">:</span><span class="n">h</span><span class="p">:</span><span class="n">b</span><span class="p">;</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">interp_points</span><span class="p">);</span><span class="c1">% Number of interpolation points</span>
+    
+    <span class="n">V</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">);</span> <span class="c1">%Columns of V will form our polynomial basis</span>
+
+    <span class="c1">% There are k Lagrange polynomials (one for each point), evaluate each</span>
+    <span class="c1">% of them at all the n points</span>
+    
+    <span class="c1">%Note how this is entirely independent of the kernel!</span>
+    <span class="k">for</span> <span class="n">ti</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">interp_points</span><span class="p">),</span>
+        <span class="k">for</span> <span class="n">yj</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="k">for</span> <span class="n">tii</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">tii</span> <span class="o">~=</span> <span class="n">ti</span><span class="p">)</span>
+                    <span class="n">denom</span> <span class="o">=</span> <span class="n">denom</span><span class="o">*</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="n">ti</span><span class="p">)</span> <span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="n">tii</span><span class="p">));</span>
+                    <span class="n">num</span><span class="o">=</span> <span class="n">num</span><span class="o">*</span><span class="p">(</span><span class="n">locs</span><span class="p">(</span><span class="n">yj</span><span class="p">)</span> <span class="o">-</span> <span class="n">interp_points</span><span class="p">(</span><span class="n">tii</span><span class="p">));</span>
+                <span class="k">end</span>
+            <span class="k">end</span>
+
+            <span class="n">V</span><span class="p">(</span><span class="n">yj</span><span class="p">,</span><span class="n">ti</span><span class="p">)</span> <span class="o">=</span> <span class="n">num</span><span class="p">/</span><span class="n">denom</span><span class="p">;</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="c1">%We only evaluate the kernel at the k by k interpolation points</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">);</span>
+    <span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+        <span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>       
+            <span class="n">S</span><span class="p">(</span><span class="nb">i</span><span class="p">,</span><span class="nb">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">i</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    
+    <span class="n">f1_poly_approx</span> <span class="o">=</span> <span class="n">V</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">V</span><span class="o">'*</span><span class="n">q</span><span class="p">;</span>
+    <span class="n">K1_poly_errors</span><span class="p">(</span><span class="nb">pi</span><span class="p">)</span> <span class="o">=</span> <span class="nb">norm</span><span class="p">(</span><span class="n">f1_poly_approx</span> <span class="o">-</span> <span class="n">f1</span><span class="p">)/</span><span class="nb">norm</span><span class="p">(</span><span class="n">f1</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="nb">figure</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="nb">clf</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span><span class="n">K1_poly_errors</span><span class="p">,</span><span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="nb">hold</span> <span class="n">on</span>
+<span class="nb">semilogy</span><span class="p">(</span><span class="n">ks</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">20</span><span class="p">),</span><span class="n">K1_svd_errors</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">20</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">ylabel</span> <span class="p">(</span><span class="s1">'Relative error'</span><span class="p">);</span> <span class="nb">xlabel</span><span class="p">(</span><span class="s1">'k'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Polynomial rank-k approximation'</span><span class="p">);</span>
+<span class="nb">legend</span><span class="p">(</span><span class="s1">'Lagrange Polynomial'</span><span class="p">,</span> <span class="s1">'SVD'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Note that the matrix $V$ is entirely independent of the kernel. As you can see below, the error decreases, but as discussed above, SVD is better.
+<img src="/~gcl22/blog/assets/low-rank-kernels/poly_vs_svd.png" alt="Optimal error" /></p>
+
+<p>Remarkably, the error is independent of the number of points $n$. And
+most importantly, it does not require formation of the matrix $K$, so it can be
+applied to millions of points with very little time and memory.</p>
+
+<p>Note that I formed the matrices V and S because I think the connection with
+matrix decomposition is very nice, but this is not done in practice as it is
+terrible numerically. Instead, we just directly compute the sums.</p>
+
+<h2 id="improving-accuracy-with-subintervals">Improving Accuracy with Subintervals</h2>
+<p>The procedure above is not numerically stable, and given the equispaced
+interpolation points, it also will suffer from the <a href="https://en.wikipedia.org/wiki/Runge%27s_phenomenon">Runge
+phenomenon</a> as $k$
+increases. So, instead of using $k$ interpolation points for the whole
+interval, we split the interval into $N_{int}$ sub-intervals, each with $k$
+interpolation points. Then, we interpolate each point using the interpolation
+points within its interval. The key point here is that because we are
+interpolating on small intervals, we can achieve machine precision, with small
+$k$.</p>
+
+<p><img src="/~gcl22/blog/assets/low-rank-kernels/lagrange_subintervals.png" alt="Lagrange Polynomial Interpolation with Subintervals" />
+To see how this works, let’s
+visualize the resulting $V$ and $S$ matrices, with $N_{int}=5$ and $k=3$.</p>
+
+<p><img src="/~gcl22/blog/assets/low-rank-kernels/subintervals_v.png" alt="V matrix" /></p>
+
+<p>Take a look at the first 200 rows of $V$, and notice how only the first
+three columns are nonzero? These are the Lagrange polynomials corresponding to the
+$k=3$ interpolation points of the first interval evaluated at the ~200 points
+in that interval. In other words, the whole interval is represented by just those three points. And the same for all the other 4 intervals.
+<img src="/~gcl22/blog/assets/low-rank-kernels/subintervals_s.png" alt="S matrix" /></p>
+
+<p>Now, $S$ contains all the interactions between all the nodes (across all
+intervals), that’s why it is $kN_{int} \times kN_{int}$. So, $V^T$ “sends”
+the points to the interpolation nodes, $S$ computes their interaction, and $V$
+sends them back to the original points!</p>
+
+<p>Take a look at the code:</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">k</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">Nint</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="c1">%Number of intervals</span>
+<span class="n">h</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="n">Nint</span> <span class="o">*</span><span class="n">k</span><span class="p">);</span>
+
+<span class="c1">%k interpolation points in each interval</span>
+<span class="n">interp_points</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">Nint</span><span class="p">);</span>
+<span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="k">for</span> <span class="n">int</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
+        <span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">,</span><span class="n">int</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span><span class="p">/</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="nb">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">int</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">h</span><span class="p">;</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1">%We need to be able to look up which interval each point belongs to</span>
+<span class="n">int_lookup</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">current_int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="n">current_int</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">locs</span><span class="p">(</span><span class="nb">i</span><span class="p">))</span>
+        <span class="n">current_int</span> <span class="o">=</span> <span class="n">current_int</span> <span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+    <span class="k">end</span>
+   <span class="n">int_lookup</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">current_int</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="c1">%Make V, which is now n rows by Nint*k columns</span>
+<span class="n">V</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">Nint</span><span class="o">*</span><span class="n">k</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">ti</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span> 
+    <span class="k">for</span> <span class="n">yj</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+        <span class="n">current_int</span> <span class="o">=</span> <span class="n">int_lookup</span><span class="p">(</span><span class="n">yj</span><span class="p">);</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">tii</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">tii</span> <span class="o">~=</span> <span class="n">ti</span><span class="p">)</span>
+                <span class="n">denom</span> <span class="o">=</span> <span class="n">denom</span><span class="o">*</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span><span class="n">current_int</span><span class="p">)</span> <span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="n">tii</span><span class="p">,</span><span class="n">current_int</span><span class="p">));</span>
+                <span class="n">num</span><span class="o">=</span> <span class="n">num</span><span class="o">*</span><span class="p">(</span><span class="n">locs</span><span class="p">(</span><span class="n">yj</span><span class="p">)</span> <span class="o">-</span> <span class="n">interp_points</span><span class="p">(</span><span class="n">tii</span><span class="p">,</span><span class="n">current_int</span><span class="p">));</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+
+        <span class="n">V</span><span class="p">(</span><span class="n">yj</span><span class="p">,(</span><span class="n">current_int</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="n">ti</span><span class="p">)</span> <span class="o">=</span> <span class="n">num</span><span class="p">/</span><span class="n">denom</span><span class="p">;</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1">%Make S, which is k*Nint by k*Nint</span>
+<span class="n">S</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">Nint</span><span class="p">,</span><span class="n">k</span><span class="o">*</span><span class="n">Nint</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">int1</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
+    <span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+        <span class="k">for</span> <span class="n">int2</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
+            <span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>    
+                <span class="n">S</span><span class="p">((</span><span class="n">int1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="nb">i</span><span class="p">,(</span><span class="n">int2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="nb">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">i</span><span class="p">,</span><span class="n">int1</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">,</span><span class="n">int2</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">f1_poly_approx</span> <span class="o">=</span> <span class="n">V</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">V</span><span class="o">'*</span><span class="n">q</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="extending-to-two-dimensions">Extending to Two Dimensions</h2>
+<p>In two dimensions, everything is analogous; but with tensor products not matrix
+products. We need to divide each dimension into $N_{int}$ subintervals,
+resulting in a grid with $(p\cdot N_{int})^2$ points. The problem, however, is
+that $K$ is now a matrix of size $(p\cdot N_{int})^2 \times (p\cdot
+N_{int})^2$, which is very large.  Because we are using equispaced nodes, and
+because $K$ can be embedded in a Toeplitz matrix of twice its size, we can use
+the Fast Fourier Transform to perform the multiplication in the Fourier domain.
+This is, in fact, the reason why we chose to use equispaced nodes in the first
+place: it allows us to use the FFT to accelerate the matrix multiplication.
+Please see the paper for more details.</p>
+
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>I am indebted to <a href="http://gauss.math.yale.edu/~mr2245/">Manas
+Rachh</a> and <a href="http://www.jghoskins.com/">Jeremy
+Hoskins</a>, from whom I learned most of this material.</p>
+
+<p>Please let me know if you find any errors, or have any questions/comments!</p>
+
+<!--- 
+----
+
+<div id="comments">
+	
+			<h2>Comments</h2>
+	
+	
+		<div class="comment odd">
+			<p class="comment_header">
+				From: 
+					George Linderman
+				
+				<br />
+				<span class="comment_date">2018-01-11 15:04</span>
+			</p>
+			<p>
+				ff
+			</p>
+		</div>
+	
+	<h1>Post a comment</h1>
+	<p style="font-style: italic">
+		All comments are held for moderation; basic HTML formatting accepted.
+	</p>
+	<form id="commentform" method="POST" action="/~gcl22/blog/cm/commentsubmit.php">
+		<input type="hidden" name="post_id" value="/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels" />
+		<input type="hidden" name="return_url" value="/~gcl22/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" />
+		<table>
+			<tr>
+				<th>Name:</th>
+				<td><input type="text" size="25" name="name" /> (required)</td>
+			</tr>
+			<tr>
+				<th>E-mail:</th>
+				<td><input type="text" size="25" name="email" /> (required, not published)</td>
+			</tr>
+			<tr>
+				<th>Website:</th>
+				<td><input type="text" size="25" name="link" /> (optional)</td>
+			</tr>
+			<tr>
+				<td colspan="2"><textarea name="comment" rows="10" cols="60" ></textarea></td>
+			</tr>
+			<tr>
+				<td><input type="submit" name="submit" value="Submit Comment" /></td>
+			</tr>
+		</table>
+	</form>
+</div>
+--->
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

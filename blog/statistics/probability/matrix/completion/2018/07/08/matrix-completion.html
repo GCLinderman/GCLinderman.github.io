@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Matrix Completion</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Matrix Completion</h1>
+    <p class="post-meta">
+      <time datetime="2018-07-08T01:00:00-04:00" itemprop="datePublished">
+        
+        Jul 8, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <!-- <script type="text/javascript" src="http://livejs.com/live.js"></script> -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-111570395-1"></script>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-111570395-1');
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/style.css" />
+
+<style>
+
+ summary::-webkit-details-marker {
+ color: #000000;
+ font-size: 125%;
+ margin-right: 2px;
+}
+summary:focus {
+	outline-style: none;
+}
+article > details > summary {
+	font-size: 28px;
+	margin-top: 16px;
+
+}
+summary{
+	font-style: italic;
+}
+details > p {
+	margin-left: 24px;
+}
+details details {
+	margin-left: 36px;
+}
+details details summary {
+	font-size: 16px;
+}
+
+
+</style>
+
+<p><em>I compiled some notes on low-rank matrix completion, with the goal of making
+the intuition behind the topic acessible  to anyone proficient in linear
+algebra, but not familiar with basic convex optimization. There is no novel
+work here; I am presenting the work of Candès and Recht (2008),  Candès and Tao
+(2009), and Recht (2010).</em></p>
+<h2 id="problem-statement">Problem Statement</h2>
+
+<p>In many applications, we wish to recover rank-$r$ $n$ by $n$ matrix $M$,
+of which we have only measured a subset of the entries.  Let the indices of $m$
+measured entries be $\Omega \subset \{1,…,n\} \times \{1,…,n\}$.
+If $m \ll n^2$, is it possible to recover this matrix exactly?</p>
+
+<p>Of course, in general, it is not possible to do this: all of the $n^2$
+measurements are needed.  But if the rank $r$ is small, there is hope, as the
+number of degrees of freedom is $nr  + r(n-r) \ll n^2$ (first choose $r$
+linearly independent columns of size $n$ and then choose $r$ coefficients
+defining the linear combination that forms each of the remaining $(n-r)$
+vectors). Since the actual dimensionality of this matrix is so much smaller
+than $n^2$, perhaps a similarly small number of elements, sampled randomly,
+will be sufficient for recovering it.</p>
+
+<p>A very reasonable attempt at recovery might be to ask for the lowest rank matrix that agrees with our measurements.  That is,</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+\text{minimize   } &\quad \text{   rank} (X) \tag{P0} \\
+\text{such that  } &\quad X_{ij} = M_{ij}\quad (i,j) \in \Omega.
+\end{align} %]]></script>
+
+<p>However, this optimization problem is NP-hard to solve. The problem is that we
+are minimizing the the $\ell_0$ norm of the singular values (i.e. the rank).
+Candès and Recht (2008) had the insight to consider the convex relaxation of
+this problem, i.e. to minimize the $\ell_1$ norm of the singular values (called
+the nuclear norm, which we denote by <script type="math/tex">\| \cdot \|_*</script>).</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+\text{minimize   } &\quad \| X \|_* \tag{P1}\\
+\text{such that  } &\quad X_{ij} = M_{ij}\quad (i,j) \in \Omega. 
+\end{align} %]]></script>
+
+<p>In contrast to P0, the optimization problem P1 is convex and much easier to
+solve, even for large matrices! We can optimize this program, no problem, but
+will it give us the right thing? Specifically, we need to know if the true
+matrix $M$ is the <strong>unique solution</strong> to (P1).</p>
+
+<p>In order to answer this question, we need some background in convex optimization.</p>
+
+<h2 id="preliminaries">Preliminaries</h2>
+
+<h3 id="matrix-spaces-and-their-norms">Matrix spaces and their norms</h3>
+<p>We will define an inner product of two matrices $A,B \in \mathbb R^{n_1 \times n_2}$ to be $\left\langle A, B \right\rangle = \text{tr}(A^T B) = \sum_{i,j} A_{ij}B_{ij}$. Denote
+the <a href="https://en.wikipedia.org/wiki/Singular-value_decomposition">singular vector decomposition</a> (SVD) of a matrix $M$ as $M=U\Sigma V^T$ and let $\sigma$ be the singular values, i.e. the diagonal of $\Sigma$. The Frobenius norm of $M$ is the sum of squares of the elements in $M$,</p>
+
+<script type="math/tex; mode=display">\| M \|_F^2 = \left\langle M, M \right\rangle = \sum_{(i,j)} M_{ij}^2,</script>
+
+<p>and it is also the sum of the squares of the singular values. This can be seen simply as</p>
+
+<script type="math/tex; mode=display">\| M \|_F^2 = \text{tr}(M^TM)= \text{tr}(V \Sigma U^T U \Sigma V^T) = \text{tr}(V \Sigma \Sigma V^T) = \sum_i \sigma_{i}^2 = \| \sigma \|_2,</script>
+
+<p>where the last equality used the fact that the trace is <a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra)#Trace_of_a_product">invariant under cyclic permutations</a>, i.e. three matrices $A,B,C$, $\text{tr}(ABC) = \text{tr}(CAB)$.</p>
+
+<p>Another useful norm is the operator norm, defined as</p>
+
+<script type="math/tex; mode=display">\|M\|_{op} = \sup_{\|x\|_2 \leq 1} \| Mx \|_2 = \max_i \sigma_i = \| \sigma \|_\infty,</script>
+
+<p>i.e. the largest singular value of the matrix.</p>
+
+<p>Finally, we have the nuclear norm,</p>
+
+<script type="math/tex; mode=display">\| M \|_* = \sum_i |\sigma_{i}| = \| \sigma \|_1,</script>
+
+<p>which is simply the sum of the singular values (note that the absolute value sign is redundant; singular values are  non-negative).</p>
+
+<p>Importantly, note that the Frobenius, operator, and nuclear norms are the
+$\ell_2$, $\ell_\infty$, and $\ell_1$
+<a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#p-norm">norms</a> of the
+singular values, respectively.</p>
+
+<p>We can also introduce the orthogonal decomposition</p>
+
+<script type="math/tex; mode=display">\mathbb R^{n_1 \times n_2} = T \otimes T^\perp,</script>
+
+<p>where $T$ is the space spanned by matrices of the form $u_k x^T$ and $yv_k^T$ for $1\leq k\leq r$ and any $x\in \mathbb R^{n_2}$ and $y \in \mathbb R^{n_1}$. 
+The projection operator $\mathcal P_T: R^{n_1 \times n_2} \rightarrow T$ is
+defined by</p>
+
+<script type="math/tex; mode=display">\mathcal P_T(X) = P_UX + XP_V - P_U X P_V,</script>
+
+<p>where $P_U$ and $P_V$ denote the orthogonal projection onto $U$ and $V$, respectively. Similarly, $\mathcal P_{T^\perp} = (\mathcal I - \mathcal P_T)(X)$, where $\mathcal I$ is the identity operator.</p>
+
+<p>Finally, we use $P_\Omega$ to denote the sampling operator which sets all
+elements of a matrix to zero, except for the indices in $\Omega$.</p>
+
+<h3 id="dual-norms">Dual norms</h3>
+<p>Let $X$ be a vector space equipped with the norm <script type="math/tex">\|\cdot \|</script>  (for example, $\mathbb R^n$ with
+<script type="math/tex">\| \cdot \|_1</script>). Now, we can talk about the space $ X^* $ which consists of
+linear functionals on $X$, i.e. all $f : X \rightarrow \mathbb R$ such that $f$
+is linear. This is called the dual space. If we want to define a norm <script type="math/tex">\|
+\cdot\|^*</script> on this space of functionals, then it is natural to use the operator
+norm:</p>
+
+<script type="math/tex; mode=display">\|f\|^* = \sup_{\| x\| \leq 1 } | f(x) |.</script>
+
+<p>That is, if you give $f$ any vector with norm less than 1, what is the largest number that can come out?</p>
+
+<p>We will consider two concrete examples in finite dimensional spaces that will
+be useful to us below. First, it is helpful to realize that in an inner product
+space, linear functionals are simply inner products (this is called the Riesz Representation Theorem).</p>
+
+<p><span class="theorem">
+In an inner product space $(X,\left\langle  \cdot , \cdot \right\rangle)$, for every linear functional $f : X
+\rightarrow \mathbb R$, there exists a unique $z \in X$ such that $f(x) =
+\left\langle x,z \right\rangle$.
+</span></p>
+
+<details>
+<summary>Proof. </summary>
+The Riesz Representation Theorem holds for any Hilbert space $X$, but since we
+will only consider finite dimensional vector spaces in these notes, we will
+only prove that special case (where it is trivial).
+
+Let $u_1,...,u_r$ be an orthonormal basis for the $r$ dimensional space $X$. Let $z = \sum_i f(u_i)u_i$, and note that
+
+$$
+\begin{align*}
+\left\langle x, z \right\rangle &amp;=  \left\langle \sum_i a_i u_i, \sum_i f(u_iu_i\right\rangle\\
+&amp;=  \sum_i a_if(u_i)\left\langle  u_i, u_i\right\rangle\\
+&amp;=  \sum_i a_if(u_i)\\
+&amp;=  f\left(\sum_i a_iu_i\right)\\
+&amp;=  f(x)\\
+\end{align*} 
+$$
+$$\tag*{$\blacksquare$}$$
+</details>
+
+<p>What is the dual space (and dual norm)? It is the vector space of all the linear functionals $f : \mathbb R^n \rightarrow \mathbb R $.
+ Equipping $ \mathbb R^n $ with the natural inner
+product (i.e. the dot product), we can use the Riesz Representation Theorem
+from above, which states that any such linear functional can be represented by
+an element of $\mathbb R^n$. That is, for every $f$, there exists a $y$ such that $f(x)
+= \left\langle y ,x \right\rangle$.</p>
+
+<p>The dual of <script type="math/tex">\| \cdot \|_1</script> on $\mathbb R^n$ is <script type="math/tex">\| \cdot \|_\infty</script>. That is,</p>
+
+<script type="math/tex; mode=display">\|y\|_\infty = \sup_{\| x\|_1 \leq 1 } | \left\langle x,y \right\rangle |.</script>
+
+<p>This makes intuitive sense as well. Given $y$, how can you make $\left\langle x,y \right\rangle $ have a large absolute value, when you can only use $x$ with
+<script type="math/tex">\|x\|_1 \leq 1</script>? You need to put all the mass of $x$ onto the maximum element of $y$.
+The converse is true as well; the dual norm of the $\ell_\infty$ norm is the
+$\ell_1$ norm.</p>
+
+<p>A second example is the space of matrices $\mathbb R^{n_1\times n_2}$, equipped
+with the inner product defined above. Analogously to the duality between
+$\ell_1$ and $\ell_\infty$, the dual of the operator norm is the nuclear norm.</p>
+
+<p>We also have the Holder inequality for these dual norms,</p>
+
+<script type="math/tex; mode=display">\left\langle A,B \right\rangle  \leq \|A\|_1 \|B\|_\infty</script>
+
+<h3 id="lagrangian-duality">Lagrangian duality</h3>
+<p>Suppose we are interested in minimizing the following constrained optimization problem</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+	\text{minimize   } &\quad f(x,y)\\
+	\text{such that  } & g(x,y) = c.
+\end{align*} %]]></script>
+
+<p>A necessary condition for there to be a solution at $(x,y)$ is that there exists $\lambda$,
+such that</p>
+
+<script type="math/tex; mode=display">\mathit L(x,y,\lambda) = \nabla_{x,y} f -  \lambda \nabla_{x,y} g = 0.</script>
+
+<p>To
+borrow Wikipedia’s <a href="https://en.wikipedia.org/wiki/Lagrange_multiplier#Single_constraint">excellent explanation</a>, consider the contour lines of $f$ and
+$g$. Of course, a solution must be on the contour line of $g$ corresponding to
+$g(x,y)=c$ for it to be reasible. So we can think about walking along this
+line, trying to find a minimum of $f$. A feasible minimum of $f$ will occur
+when the tangets of the contour lines of $f$ and $g$ are parallel.  That is,
+where the contour line is $g=c$ is just
+“kisssing” (<a href="https://commons.wikimedia.org/wiki/File:LagrangeMultipliers2D.svg">source</a>)
+a contour line of $f$:</p>
+
+<center> <img src="/~gcl22/blog/assets/matrix-completion/LagrangeMultipliers.png" alt="Lagrange Multiplier illustration" style="width:400px;" /> </center>
+
+<p>At such a point, there are no feasible points for which
+$f$ is any smaller…otherwise the tangents would not
+be parallel. If the tangents are parallel, then the gradients are also
+parallel. That is, there exists a $\lambda$ such that</p>
+
+<script type="math/tex; mode=display">\nabla_{x,y} f =  \lambda \nabla_{x,y} g,</script>
+
+<p>exactly the condition described above.</p>
+
+<p>How about for P1? Here, we have $m$ constraints,</p>
+
+<script type="math/tex; mode=display">g_k(X) = X_{i,j} - M_{i,j} = 0 ,</script>
+
+<p>by enumerating the elements of $\Omega$ as $k=1,…,m$ and letting $(i,j)$ be the $k$th index pair.</p>
+
+<p>The equivalent condition to the 2D case, then, is the existence of $\lambda_1,…,\lambda_m$, such that</p>
+
+<script type="math/tex; mode=display">\|X\|_* = \sum_{k=1}^m \lambda_k (X_{i,j} - M_{i,j}).</script>
+
+<p>Taking a gradient wrt $X$,</p>
+
+<script type="math/tex; mode=display">\nabla g_k(X) = e_{i} e_{j}^T,</script>
+
+<p>i.e. the matrix of zeros with one in the $(i,j)$th entry. So, we have</p>
+
+<script type="math/tex; mode=display">\nabla \|X\|_* - \sum_{k=1}^m \lambda_k e_{i,j} = \nabla \|X\|_* - P_\Omega \Lambda = 0,</script>
+
+<p>where $\Lambda \in \mathbb R^{n_1\times n_2}, $ and $P_\Omega$ sets all elements not in $\Omega$ to zero.</p>
+
+<p>However, the nuclear norm is not differentiable, and hence we need to effectively replace the $\nabla$ with a sub-diffferential, in order to apply this approach.</p>
+
+<h3 id="subgradients">Subgradients</h3>
+
+<p>Recall that a convex function lies above all its tangents. In fact, that is a
+definition of a convex function. If the function is differentiable, then its
+tangent at each point is well-defined. But if it’s not differentiable, there
+might be a set of tangents. This “set of tangents” is extremely useful for convex
+optimization.</p>
+
+<p>A vector $g \in V$ is a <a href="https://en.wikipedia.org/wiki/Subderivative">subgradient</a> of a convex function $f : V \rightarrow \mathbb R$ at $x_0$ if for all $z$,</p>
+
+<script type="math/tex; mode=display">f(z) \geq f(x_0) + \left\langle g, z-x_0 \right\rangle</script>
+
+<p>In 1D, the picture (<a href="https://en.wikipedia.org/wiki/Subderivative#/media/File:Subderivative_illustration.png">source</a>) is especially clear:</p>
+
+<center> <img src="/~gcl22/blog/assets/matrix-completion/Subderivative_illustration.png" alt="Subderivative" style="width:400px;" /> </center>
+
+<p><br /> 
+The red lines are subgradients of the function (blue) at a point $x_0$ where $f$ is not differentiable.</p>
+
+<p>Recall that for a convex differentiable function, if $\nabla f(x_0) = 0$, then
+$x_0$ is a global minimum of $f$. It an exactly analogous with
+subgradients–except that now we ask if $0$ is in the <em>set</em> of subgradients.
+For convex $f$, if $0\in \partial f(x)$, then $x_0$ is global minimum because
+for any $h\in V$,</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+		f(x_0+h) \geq f(x_0) + \left\langle 0, z \right\rangle = f(x_0)
+	\end{align*}</script>
+
+<p>Clearly, the subgradient is useful for convex optimization!  So let’s derive
+the subgradient for the nuclear norm at $X = U\Sigma V^T$. A formal derivation
+an be found in <a href="https://www.sciencedirect.com/science/article/pii/0024379592904072">Watson
+(1992)</a>,
+below is some intuition for the direction we are interested in.</p>
+
+<p><span class="theorem">
+All matrices of the form <script type="math/tex">\{ UV^T + W : W \in \mathbb R^{n_1\times n_2}, \|W\|_{op} \leq 1, U^TW = 0, WV^T = 0 \}</script> are subdifferentials of the trace norm at $X = U\Sigma V^T$.
+</span></p>
+
+<details>
+<summary>Proof. </summary>
+<div class="proof">
+Let 
+
+$$G = \{ UV^T + W : W \in \mathbb R^{n_1\times n_2}, \|W\|_{op} \leq 1, U^TW = 0, WV = 0 \}.$$
+
+When function $f(x)$ is sup over set of functions $f_a$ indexed by compact set $A$ ( see e.g., <a href="https://stanford.edu/class/ee364b/lectures/subgradients_notes.pdf"> here</a>), 
+
+$$ \text{conv} \left( \bigcup\limits_{\{s:f_s(x) = f(x)\} }  \partial f_s  \right)\subset \partial f(x).$$
+
+That is,  the convex hull of the subgradients of the functions $f_s$ that achieve the sup at that point are subgradients. 
+
+$\| \cdot \|_*$ can be written in this form. Recalling that the nuclear norm is dual to the operator norm,
+
+$$\| X \|_* = \sup_{\|Y\| \leq 1} \text{tr}(Y^T X ),$$
+
+we see that we only need to ask, which are the $Y$, with $\|Y\| \leq 1$, that maximize $\text{tr}(Y^TX)$?
+
+Decompose any $Y \in \mathbb R^{n_1 \times n_2}$ with $\| Y \| \leq 1$ as 
+
+$$Y = \mathcal P_T(Y) + \mathcal P_{T^\perp}(Y),$$
+
+where $T$ and $T^\perp$ are the subspaces of matrices defined above, but this time with respect to the SVD of $X$. This means that the value to maximize is 
+
+$$\left\langle Y, X \right\rangle = \left\langle \mathcal P_T(Y), U\Sigma V^T \right\rangle + \left\langle \mathcal P_{T^\perp} (Y), U\Sigma V^T \right\rangle = \left\langle \mathcal P_T(Y), U\Sigma V^T \right\rangle,$$
+
+which can be maximized by setting $\mathcal P_T(Y) = U V^T$. Furthermore,
+any $W$ with $\| W \| \leq 1$ can be added and the maximum
+will not change.
+
+Therefore, any matrix $Y$ such that,
+
+<ul>
+<li>  $\mathcal P_T(Y) = U V^T$ </li>
+<li> $\|\mathcal P_{T^\perp}(Y) \|_{op} \leq 1$, </li>
+</ul>
+
+is a subderivative of the nuclear norm at $X = U\Sigma V^T$.
+
+
+</div>
+</details>
+<p>Therefore, if  $Y$ is a matrix such that $\mathcal P_T(Y) = UV^T$ and <script type="math/tex">\| \mathcal P_{T^\perp} (W)  \|_{op} \leq 1</script>, then it is a subderivative of the nuclear norm at $M$.</p>
+
+<h2 id="what-kind-of-matrices-can-be-recovered">What kind of matrices can be recovered?</h2>
+<p>It is not enough that the matrix simply be low rank. Consider the matrix $M =
+e_i e_j^*$, where $e_j$ is the $j$th standard basis vector, i.e. the vector of
+zeros where the $j$th element is 1, like</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix}
+    0 & 0 & 0 & 1 \\
+    0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0
+\end{bmatrix} %]]></script>
+
+<p>No matter how you sample this rank-1 matrix, you need to have every value to recover it exactly.</p>
+
+<p>Or consider the classical example of collaborative filtering, i.e. the “Netflix
+Problem.” Suppose Netflix keeps track of of every user’s ratings in a matrix
+form, where the rows correspond to movies, the columns correspond to users, and
+the element is the numeric rating (e.g. from 1-5) assigned to the movie by a
+given user. We call all the movies that the user has not seen “missing,”
+because we don’t know how much the user will like it. The matrix completion
+problem in this context is to estimate the scores the user would assign to each
+of the movies, if he/she saw them all.</p>
+
+<p>It is easy to see that this matrix might be “approximately” low-rank, because
+there will be lots of correlation between the rows/columns.  For example, say
+there were $m$ movies and $n$ users, so the $m\times n$ matrix was actually
+rank r, then its SVD can be written as</p>
+
+<script type="math/tex; mode=display">M = \sum_{i=1}^r u_iv_i^T \sigma_i.</script>
+
+<p>One might imagine that each $u_i$ could correspond to a movie genre (e.g.
+action, adventure, romance, etc), and then $v_i$ determines how much each user
+“likes” that genre.  Indeed, $u_i v_i^T\sigma_i$ is an $m \times n$ matrix that
+contains the contribution of that given genre to all the elements. Suppose,
+however, that $v_2 = e_1$, i.e. it is a vector of zeros with 1 in the first
+element. Such a matrix cannot be recovered, because all the information about
+$u_2$ is in the first column, and so we need to always sample every value in
+the first column to exactly recover this matrix.</p>
+
+<p>In both these examples, the problem is that one of the singular vectors is a
+standard basis vector. A necessary condition for matrix completion is that none
+of the (left or right) singular vectors of the matrix are too correlated with
+the standard basis.  This is quantified in a measure of “coherence” for a
+subspace,  which measured how “spread out” the basis vectors are. Candès and
+Recht define the coherence of an $r$-dimensional subspace $U$ of $\mathbb R^n$ as</p>
+
+<script type="math/tex; mode=display">\mu(U) = \frac{n}{r} \max_{1\leq i\leq n} \| P_U e_i \|^2,</script>
+
+<p>where $P_U$ is the orthogonal projection onto $U$. This can be thought of as a
+mesure of “how well can the subspace represent $e_i$.” That is, how “ordered”
+are they, or “concentrated,” with respect to the standard basis.  Using coherence, we can now state the main theorem.</p>
+
+<h2 id="some-intuition">Some intuition</h2>
+<p>Before we state the main theorem, let’s get some intuition by letting $M$ be
+the rank-1, 3 by 3 matrix of ones. By computing the SVD of $M = \sum_{i=1}^3
+\sigma_i u_i v_i^T$ where $\sigma_2$ and $\sigma_3$ are zero, we can visualize
+the subspace defined by linear combinations of the basis vectors $u_1 v_1^T$,
+$u_2 v_2^T$, $u_3 v_3^T$.  The latter two are in $T^\perp$, whereas the first
+is in $T$.  Of course, the space of all matrices 3 by 3 matrices is 9
+dimensional, but visualizing these three can give some intuition.</p>
+
+<p>Now, suppose we sample $M$ at all entries except for the upper right corner. By
+varying that entry, we can see the subspace (a line) of matrices that obey the
+constraint in P1 (i.e. the feasible set). P1 successfully recovers the true
+matrix $M$ when every other matrix on this line has a larger nuclear norm. We
+can visualize this scenario in the 3-dimensional space defined above.</p>
+
+<p><img src="/~gcl22/blog/assets/matrix-completion/3x3_demo.png" alt="Demo 3 by 3" /></p>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">% Let the true matrix be a rank-1 3 by 3 matrix of 1s. Suppose we sample</span>
+<span class="c1">% all but its upper right corner.</span>
+<span class="n">M</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="p">[</span><span class="n">U</span> <span class="n">S</span> <span class="n">V</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">M</span><span class="p">);</span>
+
+<span class="p">[</span><span class="n">l1</span> <span class="n">l2</span>  <span class="n">l3</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_lambda3</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">)</span> <span class="c1">% Note that this is just diag(S) here</span>
+
+<span class="nb">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span><span class="nb">clf</span>
+<span class="nb">scatter3</span><span class="p">(</span><span class="n">l3</span><span class="p">,</span><span class="n">l2</span><span class="p">,</span><span class="n">l1</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span> <span class="s1">'red'</span><span class="p">,</span><span class="s1">'filled'</span><span class="p">);</span>
+<span class="n">txt1</span> <span class="o">=</span> <span class="s1">' \leftarrow M'</span><span class="p">;</span> <span class="n">t</span><span class="o">=</span><span class="nb">text</span><span class="p">(</span><span class="n">l3</span><span class="p">,</span><span class="n">l2</span><span class="p">,</span><span class="n">l1</span><span class="p">,</span><span class="n">txt1</span><span class="p">);</span><span class="n">t</span><span class="o">.</span><span class="n">FontWeight</span> <span class="o">=</span> <span class="s1">'bold'</span><span class="p">;</span>
+
+<span class="nb">hold</span> <span class="n">on</span>
+
+<span class="c1">% Plot the projection of all feasible matrices into this 3 dimensional</span>
+<span class="c1">% subspace. A feasible matrix is one where all values except the upper</span>
+<span class="c1">% right corner are 1. </span>
+<span class="n">feasibles</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">replacements</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="mf">0.5</span><span class="p">:</span><span class="mi">10</span>
+<span class="k">for</span> <span class="n">ii</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">replacements</span><span class="p">)</span>
+    <span class="n">A2</span> <span class="o">=</span> <span class="n">M</span><span class="p">;</span>
+    <span class="n">A2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">replacements</span><span class="p">(</span><span class="n">ii</span><span class="p">);</span>
+    <span class="p">[</span><span class="n">l1</span> <span class="n">l2</span> <span class="n">l3</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_lambda3</span><span class="p">(</span><span class="n">A2</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">);</span>
+    <span class="n">feasibles</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">l1</span><span class="p">;</span>
+    <span class="n">feasibles</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">l2</span><span class="p">;</span>
+    <span class="n">feasibles</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">l3</span><span class="p">;</span>
+
+<span class="k">end</span>
+
+<span class="k">global</span> <span class="n">M_norm</span><span class="p">;</span>
+<span class="n">M_norm</span> <span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S</span><span class="p">));</span>
+
+<span class="nb">scatter3</span><span class="p">(</span><span class="n">feasibles</span><span class="p">(:,</span><span class="mi">3</span><span class="p">),</span><span class="n">feasibles</span><span class="p">(:,</span><span class="mi">2</span><span class="p">),</span> <span class="n">feasibles</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span><span class="s1">'filled'</span><span class="p">)</span>
+<span class="n">txt1</span> <span class="o">=</span> <span class="s1">'  P_\Omega (X) = P_\Omega(M)'</span><span class="p">;</span>
+<span class="n">t</span>  <span class="o">=</span><span class="nb">text</span><span class="p">(</span><span class="n">feasibles</span><span class="p">(</span><span class="k">end</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">feasibles</span><span class="p">(</span><span class="k">end</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">feasibles</span><span class="p">(</span><span class="k">end</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">txt1</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">FontWeight</span> <span class="o">=</span> <span class="s1">'bold'</span>
+
+<span class="c1">% Plot the L1 ball in this subspace (there might be a much cleaner way to</span>
+<span class="c1">% do this...)</span>
+<span class="n">zfun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="p">(</span><span class="n">M_norm</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;=</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="mi">0</span>
+<span class="n">xfun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;=</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="n">M_norm</span><span class="o">.*</span><span class="n">x</span><span class="o">.</span><span class="p">/(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.001</span><span class="p">);</span>
+<span class="n">yfun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="n">y</span> <span class="o">+</span>  <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;=</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="n">M_norm</span><span class="o">.*</span><span class="n">y</span><span class="o">.</span><span class="p">/(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.001</span><span class="p">);</span>
+<span class="n">hSurface</span> <span class="o">=</span> <span class="nb">fsurf</span><span class="p">(</span> <span class="n">xfun</span><span class="p">,</span><span class="n">yfun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">,[</span><span class="o">-</span><span class="n">M_norm</span> <span class="n">M_norm</span> <span class="o">-</span><span class="n">M_norm</span> <span class="n">M_norm</span><span class="p">]</span> <span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="n">hSurface</span><span class="p">,</span> <span class="s1">'FaceAlpha'</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">'MeshDensity'</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="nb">hold</span> <span class="n">on</span><span class="p">;</span>
+<span class="n">zfun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="p">(</span><span class="o">-</span><span class="n">M_norm</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;=</span><span class="n">M_norm</span> <span class="p">)</span><span class="o">.*</span><span class="mi">0</span>
+<span class="n">hSurface</span> <span class="o">=</span> <span class="nb">fsurf</span><span class="p">(</span> <span class="n">xfun</span><span class="p">,</span><span class="n">yfun</span><span class="p">,</span><span class="n">zfun</span><span class="p">,[</span><span class="o">-</span><span class="n">M_norm</span> <span class="n">M_norm</span> <span class="o">-</span><span class="n">M_norm</span> <span class="n">M_norm</span><span class="p">]</span> <span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="n">hSurface</span><span class="p">,</span> <span class="k">...</span>
+  <span class="s1">'FaceAlpha'</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span> <span class="k">...</span>
+   <span class="s1">'MeshDensity'</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="nb">colormap</span> <span class="nb">hot</span>
+<span class="nb">zlabel</span><span class="p">(</span><span class="s1">'u_1v_1^T'</span><span class="p">)</span>
+<span class="nb">ylabel</span><span class="p">(</span><span class="s1">'u_2v_2^T'</span><span class="p">)</span>
+<span class="nb">xlabel</span><span class="p">(</span><span class="s1">'u_3v_3^T'</span><span class="p">)</span>
+
+
+
+<span class="c1">% A function that gives the projection of a 3 by 3 matrix onto the subspace</span>
+<span class="c1">% defined by the following three basis "vectors": U(:,i) * V(:,i)' for i=1,..,3 </span>
+
+<span class="k">function</span> <span class="p">[</span> <span class="n">l1</span><span class="p">,</span><span class="n">l2</span><span class="p">,</span> <span class="n">l3</span> <span class="p">]</span> <span class="o">=</span> <span class="n">get_lambda3</span><span class="p">(</span> <span class="n">A</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span><span class="n">V</span> <span class="p">)</span>
+<span class="n">u1</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">1</span><span class="p">);</span> <span class="n">u2</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">2</span><span class="p">);</span> <span class="n">u3</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">V</span><span class="p">(:,</span><span class="mi">1</span><span class="p">);</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">V</span><span class="p">(:,</span><span class="mi">2</span><span class="p">);</span> <span class="n">v3</span> <span class="o">=</span> <span class="n">V</span><span class="p">(:,</span><span class="mi">3</span><span class="p">);</span>
+
+<span class="n">l1</span> <span class="o">=</span> <span class="n">u1</span><span class="o">'*</span><span class="n">A</span><span class="o">*</span><span class="n">v1</span><span class="p">;</span>
+<span class="n">l2</span> <span class="o">=</span> <span class="n">u2</span><span class="o">'*</span><span class="n">A</span><span class="o">*</span><span class="n">v2</span><span class="p">;</span>
+<span class="n">l3</span> <span class="o">=</span> <span class="n">u3</span><span class="o">'*</span><span class="n">A</span><span class="o">*</span><span class="n">v3</span><span class="p">;</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>Of course, we need to be careful about reading too much into this figure,
+because it is only 3 of the 9 dimensions.  That being said, it still gives a nice
+intuition.  For example, what if</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+M = \begin{bmatrix}
+    1 & 5 & 2 \\
+    1 & 5 & 2 \\
+    0 & 0 & 0 \\
+\end{bmatrix} %]]></script>
+
+<p>Note that this is still a rank-1 matrix, but it is more “coherent.” Here is the same visualization:</p>
+
+<p><img src="/~gcl22/blog/assets/matrix-completion/3x3_demo2.png" alt="Demo 3 by 3" /></p>
+
+<p>Note how there are feasible solutions with smaller $\ell_1$ norm of the
+coefficients in this subspace than $M$. This suggests that the matrix is not
+recoverable.  This visualization also suggests how the subgradient works.
+Recall that a subgradient $Y$ has to have a coefficient of 1 on the $u_1v_1^T$
+axis, and then if $W=  \mathcal P_{T^\perp(M)},$ then <script type="math/tex">\|W\|_{op} \leq 1</script>.
+This means that the angle between the $u_1v_1^T$ axis and $Y$ must be less than
+or equal to 45 degrees. So, if such a subgradient is in the range of the
+sampling operator, it means that the feasible set will only intersect with the
+$\ell_1$ ball at $M$.</p>
+
+<h2 id="main-theorem">Main Theorem</h2>
+<p>Before we state the main theorem, we need two assumptions about the matrix $M =
+\sum_{k=1}^r \sigma_k u_k v_k^*$, where column and row spaces are $U$ and $V$.</p>
+
+<p><strong>A0</strong>: Coherence of column and row spaces is bounded, i.e. $\max( \mu(U), \mu(V) ) \leq \mu_0$ for some positive $\mu_0.$</p>
+
+<p><strong>A1</strong>: The matrix  $\sum_{k=1}^r u_kv_k^*$ has maximum entry bounded by $\mu_1 \sqrt{r/(n_1n_2)}$ in absolute value for some positive $\mu_1$</p>
+
+<p>Note that <strong>A1</strong> always holds with $\mu_1 = \sqrt{r} \mu_0$ because of Cauchy Schwarz, so won’t worry about it for small $r$.</p>
+
+<p>Now, we can state a theorem of Candès and Recht (2008):</p>
+<div class="theorem">
+Let $M$ be $n_1 \times n_2$ matrix of rank $r$ obeying <strong>A0</strong> and <strong>A1</strong>, and let $n=
+max(n_1,n_2)$. Suppose $m$ entries of $M$ are observed at locations sampled
+uniformly. Then there exist $C,c$ such that if 
+
+$$m \geq C \max( \mu_1^2, \mu_0^{1/2}\mu_1, \mu_n^{1/4} ) nr(\beta \log n )$$
+
+for some $\beta &gt;2$, then the minimizer to P1 is unique and equal to $M$ with
+probability at least $1-cn^{-\beta}$. For $r \leq \mu_0^{-1} n^{1/5}$ this
+estimate can be improved to 
+
+$$m \geq C \mu_0 n^{6/5} r ( \beta \log n)$$
+with same probability of success.
+</div>
+
+<p>Notably, Candès and Tao (2009) then further improved the number of sampled
+elements to be $m \sim nr\log^6 n$ which they showed was “nearly optimal.”</p>
+
+<p>The proof of this theorem, and the improved bound by Candès and Tao, requires
+some heavy machinery beyond the scope of these notes. We will show, however,
+the general architecture of the proof, which is ubiquitous in this area of research.  It comes from this lemma:</p>
+
+<div class="lemma">
+Consider $X_0 = \sum_{k=1}^r \sigma_k u_kv_k^*$ which is feasible for P1. Suppose the following conditions hold:
+<ol>
+<li>There exists dual point $\lambda$ such that $Y = P_\Omega \lambda$ which obeys 
+$$P_T(Y) = \sum_{k=1}^r u_k v_k^*,\quad \|P_{T^\perp}(Y)\| &lt; 1.$$ </li>
+<li>The sampling operator $P_\Omega$ restricted to elements in $T$ is injective. </li>
+</ol>
+Then $X_0$ is the unique minimizer.
+</div>
+<details>
+<summary>Proof. </summary>
+<div class="proof">
+Consider $X_0 + H$, with $P_\Omega(H) = 0$. That is, any other matrix that is feasible for P1.  To show that $X_0$ is the unique minimizer, we need to show that 
+
+$$\|X_0 + H \| &gt; \| X_0 \|.$$
+
+For any $W_0 \in T$ with $\|W_0\|_{op} \leq 1$, $\sum_{i=1}^r \sigma_i u_i v_i^* + W_0$ is subgradient, so
+
+$$\|X_0 + H \|_{op} \geq \|X_0\|_{op} + \left\langle \sum_i \sigma_i u_i v_i^* + W_0, H \right\rangle$$
+Letting $W=P_{T^\perp} (Y)$, by assumption, we have $\sum_i \sigma_i u_i v_i^* = P_\Omega\lambda - W$, so
+
+$$
+\begin{align*}
+	\|X_0 + H \|_{op} &amp;\geq \|X_0\|_{op} + \left\langle P_\Omega \lambda + W_0 - W, H \right\rangle\\
+		     &amp;\geq \|X_0\|_{op} + \left\langle  W_0 - W, H \right\rangle\\
+\end{align*}
+$$
+
+<br />
+Now, just need to show that $\left\langle W_0 - W, H \right\rangle &gt; 0.$
+
+
+Because $W_0,W\in T^\perp$,
+$$\left\langle W_0 - W, H \right\rangle = \left\langle P_{T^\perp} (W_0 -W), H \right\rangle  =  \left\langle W_0 - W, P_{T^\perp} (H) \right\rangle$$
+
+ We set $W_0 = P_{T^\perp}(Z)$, where $\|Z\|_{op} \leq 1$ and $\left\langle Z,
+ P_{T^\perp}(H) \right\rangle = \| P_{T^\perp(H)} \|_*$. Such a $Z$ exists
+ because $\|\cdot \|_*$ and $\|\cdot\|_{op}$ are dual norms.
+
+$$
+ \begin{align*}
+	 \left\langle W_0 - W, H \right\rangle &amp;= 	\left\langle W_0, P_{T^\perp} (H) \right\rangle - \left\langle W, P_{T^\perp}( H) \right\rangle\\
+				&amp;\geq 	\|P_{T^\perp}(H)\|_* - \|W\|_{op} \| P_{T^\perp(H)} \|_*\\
+				&amp;= 	(1 - \|W\|) \| P_{T^\perp(H)} \|_*
+ \end{align*}
+$$
+
+Which is strictly positive, unless $\| P_{T^\perp(H)} \|_* = 0$. But if it is
+zero, then $H \in T$ and $P_\Omega(H) = 0$, so by injectivity of $P_\Omega$ on
+$T$, $H=0$.
+
+Therefore, $\|X_0 + H \|_* &gt; \|X\|_*$
+</div>
+</details>
+
+<p>That is, if we construct a dual certificate that is a subgradient of the
+nuclear norm at $M$, and we show that the sampling operator on $T$ is
+injective, we are done! Candès and Recht (2008), Candès and Tao (2009), and
+Recht (2010) all differ primarily in how they accomplish these tasks. Here we
+highlight the particularly simple and elegant approach of Recht (2010) that
+uses matrix concentration inequalities.</p>
+
+<h2 id="simplification-by-sampling-with-replacement">Simplification by sampling with replacement</h2>
+<p>Note that theorem is about uniform sampling of the matrix entries. However, in their
+proofs,  Candès and Recht (2008) and Candès and Tao (2009) both use binomial
+sampling, then bound error of this approximation. Recht (2010) dramatically
+simplifies proof by using sampling with replacement and using matrix concentration inequalities.</p>
+
+<p>Let $\Omega = { (a_{k}, b_k) }_{k=1}^m $ be collection of indices sampled
+uniformly with replacement.
+Define</p>
+
+<script type="math/tex; mode=display">\mathit R_\Omega(Z) = \sum_{k=1}^{|\Omega|} \left\langle e_{a_k} e_{b_k}^*, Z \right\rangle e_{a_k} e_{b_k}^*.</script>
+
+<p>Note that this is not a projection operator if there are duplicates, but can
+easily bound the number of duplicates using a standard Chernoff bound.</p>
+
+<p>Recht (2010) then uses this framework to construct an “approximate dual
+certificate,” and also show that the sampling operator $\mathit R_\Omega$ is
+injective on $T$. Here, we show only the latter, as it is a particularly elegant
+application of matrix inequalities.</p>
+
+<p>To show that the sampling operator is injective, Recht (2010) shows that it is an approximate isometry:</p>
+
+<div class="theorem">
+Suppose $\Omega$ is set of $m$ entries sampled independently and uniformly with replacement. Then for all $\beta &gt; 1$,
+
+$$\frac{n_1n_2}{m} \left\| P_T \mathit R_\Omega P_T - \frac{m}{n_1n_2} P_T \right\| \leq \sqrt { \frac{16 \mu_0 r(n_1 + n_2) \beta \log(n_2)}{3m}}  = a$$
+
+with probability at least $1-wn^{2-2\beta}$ provided that $m &gt; \frac{16}{3} \mu_0 r(n_1+n_2) \beta \log(n_2)$.
+</div>
+
+<p>Note that this is stronger than injectivity! For $X\in T$,</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\left\|P_T \mathit R_\Omega X - \frac{m}{n_1n_2}X\right\| < a \frac{m}{n_1n_2} \| X \| %]]></script>
+
+<p>So, $\mathit R_\Omega$ cannot vanish, because otherwise</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\frac{m}{n_1n_2} \|X\| &< a \frac{m}{n_1n_2} \| X \|\\
+1 &< a
+\end{align*} %]]></script>
+
+<p>but $m$ is chosen to be large enough that $a &lt;1 $.</p>
+
+<p>To prove this theorem, Recht notes that</p>
+
+<script type="math/tex; mode=display">\mathbb E P_T \mathit R_\Omega P_T = P_T \mathbb E \mathit R_\Omega P_T  = \frac{m}{n_1n_2} P_T</script>
+
+<p>So, we are simply bounding the deviation of $ P_T \mathit R_\Omega P_T $ from its mean:</p>
+
+<script type="math/tex; mode=display">\frac{n_1n_2}{m} \left\| P_T \mathit R_\Omega P_T - \frac{m}{n_1n_2} P_T \right\|,</script>
+
+<p>which is exactly where matrix concentration inequalities come in! Recht simply
+bounds the first and second moments, then applies Matrix Bernstein to obtain the
+above theorem. In Joel Tropp’s  (absolutely excellent)
+<a href="https://arxiv.org/abs/1501.01571">review</a> of matrix concentration
+inequalities, and he notes that this application is one of the first to
+popularize matrix concentation inequalities in machine learning and
+mathematical statistics.</p>
+
+<p>Hopefully these notes were helpful; please feel free to contact me with any corrections, suggestions, or comments.</p>
+
+<h2 id="references">References</h2>
+<ol>
+  <li>Candès, Emmanuel J., and Benjamin Recht. “Exact matrix completion via convex optimization.” Foundations of Computational mathematics 9.6 (2009): 717.</li>
+  <li>Candès, Emmanuel J., and Terence Tao. “The power of convex relaxation: Near-optimal matrix completion.” IEEE Transactions on Information Theory 56.5 (2010): 2053-2080.</li>
+  <li>Recht, Benjamin. “A simpler approach to matrix completion.” Journal of Machine Learning Research 12.Dec (2011): 3413-3430.</li>
+</ol>
+
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

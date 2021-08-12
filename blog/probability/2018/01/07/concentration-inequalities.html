@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Concentration Inequalities</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/probability/2018/01/07/concentration-inequalities.html">
+  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+		<!---
+          
+            
+            
+          
+            
+            
+            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+	  --->
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Concentration Inequalities</h1>
+    <p class="post-meta">
+      <time datetime="2018-01-07T15:58:45-05:00" itemprop="datePublished">
+        
+        Jan 7, 2018
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-111570395-1"></script>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-111570395-1');
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+
+<style>
+
+ summary::-webkit-details-marker {
+ color: #000000;
+ font-size: 125%;
+ margin-right: 2px;
+}
+summary:focus {
+	outline-style: none;
+}
+article > details > summary {
+	font-size: 28px;
+	margin-top: 16px;
+
+}
+summary{
+	font-style: italic;
+}
+details > p {
+	margin-left: 24px;
+}
+details details {
+	margin-left: 36px;
+}
+details details summary {
+	font-size: 16px;
+}
+
+
+</style>
+
+<p>Concentration inequalities are used to bound the deviation of a random variable
+from some number, and they show up everywhere. The treatment here closely
+follows Chapter 2 of the excellent book <a href="https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.html">High Dimensional
+Probability</a>,
+by Vershynin. I have added some intuition, solved exercises, and included
+some simulations that I felt to be enlightening.</p>
+
+<p>The motivating question will be the following: Consider a coin flipped $N$
+times.  What is the probability of observing $\frac{3}{4}N$ heads? We will find
+that the probability decreases <em>exponentially</em> with $N$.</p>
+
+<h2 id="central-limit-theorem">Central Limit Theorem</h2>
+
+<p>First, let’s discuss what the central limit theorem (CLT) says about our
+coin-flipping experiment. Denote the outcome of the $i$th coinflip as the
+Bernoulli random variable $X_i$ which takes the value 1 if the outcome is heads
+and 0 if it is tails. Denote the number of heads  in an experiment with $N$ tosses as $S_N = \sum_i X_i$.
+The CLT (in this case, the de Moivre-Laplace theorem) states</p>
+
+<script type="math/tex; mode=display">Z_N \xrightarrow[D]{} N(0,1),</script>
+
+<p>where $Z_N = \frac{S_N - Np}{\sqrt{Np(1-p)}}$ is simply the number of heads centered and rescaled.
+That is, the distribution of the number of heads in our experiment will
+approach a normal distribution as the number of coin tosses $N$ goes to
+infinity.</p>
+
+<p>Let’s check it out in R:</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">10</span><span class="p">,</span><span class="m">20</span><span class="p">,</span><span class="m">50</span><span class="p">,</span><span class="m">1000</span><span class="p">)</span><span class="w"> </span><span class="c1">#Number of coin flips </span><span class="w">
+</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">0.5</span><span class="p">;</span><span class="w"> </span><span class="c1"># It's a fair coin</span><span class="w">
+</span><span class="n">test_size</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">10000</span><span class="p">;</span><span class="w"> </span><span class="c1">#Number of times we will simulate the experiment.</span><span class="w">
+</span><span class="n">toplots</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">();</span><span class="w">
+</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ni</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)){</span><span class="w">
+  </span><span class="n">n</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ns</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w">
+  </span><span class="n">S_N</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rbinom</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span><span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="p">);</span><span class="w"> </span><span class="c1"># Simulating the experiment by drawing from a binomial distribution</span><span class="w">
+  </span><span class="n">Z_N</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p">(</span><span class="n">S_N</span><span class="o">-</span><span class="n">n</span><span class="o">*</span><span class="n">p</span><span class="p">)</span><span class="o">/</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="m">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="w">
+  </span><span class="n">Z</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span><span class="w">
+  </span><span class="n">toplot</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">Z_N</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="w">
+                       </span><span class="n">group</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"# of Heads"</span><span class="p">,</span><span class="n">test_size</span><span class="p">),</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Normal Distribution"</span><span class="p">,</span><span class="n">test_size</span><span class="p">)),</span><span class="w"> 
+                       </span><span class="n">N</span><span class="o">=</span><span class="nf">rep</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">test_size</span><span class="p">))</span><span class="w">
+  </span><span class="n">toplots</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rbind</span><span class="p">(</span><span class="n">toplots</span><span class="p">,</span><span class="n">toplot</span><span class="p">)</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">ggplot</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_density</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">toplots</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="n">facet_wrap</span><span class="p">(</span><span class="o">~</span><span class="n">N</span><span class="p">,</span><span class="n">scales</span><span class="o">=</span><span class="s2">"free"</span><span class="p">)</span><span class="o">+</span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">panel.background</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">xlab</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/concentration/clt_density.png" alt="CLT" /></p>
+
+<p>Clearly, the density of $Z_N$ is approaching that of a normal distribution. Can
+this help us in getting an exponential bound for the probability of the number
+of heads exceeding $\frac{3N}{4}$? After all, the tails of a Gaussian decay
+exponentially, so if our random variable of interest approaches a Gaussian,
+shouldn’t that be enough?</p>
+
+<p>Interestingly, it turns out, this does not work at all! The problem is that the
+<em>rate</em> at which the $Z_N$ converges in distribution is not nearly fast enough. A quantitative version of the central limit theorem, the Berry-Esseen CLT, says that</p>
+
+<script type="math/tex; mode=display">\big| \mathrm P \left\{ Z_N \geq t \right\} - \mathrm P \left\{ g \geq t \right\} \big| \leq \frac{C}{\sqrt{N} }</script>
+
+<p>where $Z \sim N(0,1)$ and $C$ is a constant that we won’t worry about here. The
+convergence is of order $1/\sqrt{N}$, so it can’t be used to obtain exponential
+decay. Furthermore, this estimate is sharp. Let’s see for ourselves in some
+simulated data</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">p</span><span class="o">=</span><span class="m">.5</span><span class="w">
+</span><span class="n">ns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">seq</span><span class="p">(</span><span class="n">from</span><span class="o">=</span><span class="m">10</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="m">1000</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="o">=</span><span class="m">10</span><span class="p">))</span><span class="w">
+</span><span class="n">empirical_diff</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="m">-1</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))</span><span class="w"> 
+</span><span class="n">test_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1000</span><span class="p">;</span><span class="w">
+</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ni</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span><span class="w"> </span><span class="p">){</span><span class="w">
+  </span><span class="n">n</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ns</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w">
+  
+  </span><span class="c1"># We want to estimate P{Z_N &gt; t}, and we know that S_N ~ binom(n,p). To use</span><span class="w">
+  </span><span class="c1"># the CDF of S_N, we need to rescale t P{Z_N &gt; t} = P{ S_N &gt; t(\sqrt(p(1-p)N))+ Np}</span><span class="w">
+  </span><span class="n">ts</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">seq</span><span class="p">(</span><span class="n">from</span><span class="o">=</span><span class="m">-3</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="m">3</span><span class="p">,</span><span class="n">by</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.1</span><span class="p">)</span><span class="w"> 
+  </span><span class="n">ts_</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ts</span><span class="o">*</span><span class="p">(</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="m">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="p">))</span><span class="o">+</span><span class="n">n</span><span class="o">*</span><span class="n">p</span><span class="w"> 
+  </span><span class="n">Z_N_gt_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="o">-</span><span class="n">pbinom</span><span class="p">(</span><span class="n">ts_</span><span class="p">,</span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="w"> 
+  </span><span class="n">g_gt_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="o">-</span><span class="n">pnorm</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span><span class="w">
+  </span><span class="n">empirical_diff</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">max</span><span class="p">(</span><span class="nf">abs</span><span class="p">(</span><span class="n">Z_N_gt_t</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">g_gt_t</span><span class="p">));</span><span class="w"> </span><span class="c1"># LHS of our inequality</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="n">berry_esseen</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">predict</span><span class="p">(</span><span class="n">lm</span><span class="p">(</span><span class="n">empirical_diff</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">I</span><span class="p">(</span><span class="n">ns</span><span class="o">^</span><span class="m">-0.5</span><span class="p">)))</span><span class="w"> </span><span class="c1"># Let's fit a curve 1/sqrt(N) to compare</span><span class="w">
+</span><span class="n">toplot</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span><span class="n">ns</span><span class="p">),</span><span class="w"> </span><span class="n">probability</span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">empirical_diff</span><span class="p">,</span><span class="n">berry_esseen</span><span class="p">),</span><span class="w">
+                     </span><span class="n">group</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Empirical Difference"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)),</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Berry Esseen Bound"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))))</span><span class="w">
+</span><span class="n">ggplot</span><span class="p">(</span><span class="n">toplot</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">probability</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="n">geom_line</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">linetype</span><span class="o">=</span><span class="n">group</span><span class="p">),</span><span class="n">size</span><span class="o">=</span><span class="m">2</span><span class="p">)</span><span class="o">+</span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">xlab</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+<p><img src="/~gcl22/blog/assets/concentration/berry_esseen.png" alt="CLT" /></p>
+
+<p>The LHS of our inequality (in blue) decays exactly as $\sim\frac{1}{\sqrt{N}}$.
+This is really slow, much slower than exponential.  So this is why we need
+concentration inequalities: CLT is not going to help us here.</p>
+
+<h2 id="concentration-inequalities">Concentration Inequalities</h2>
+<p>In these notes, the bounds we will consider will increase in strength as they
+increase in the amount of information (i.e. assumptions) about the random
+variables (or sums of random variables) they are bounding. We begin with Markov
+Inequality, which uses only non-negativity of the random variable. Then we use
+it to prove Chebyshev, which uses the variance. By
+assuming independence, we obtain an exponential bound using Hoeffding. And
+finally, by taking into account the mean of our random variables, we obtain
+Chernoff.</p>
+
+<h3 id="markov--chebyshev">Markov &amp; Chebyshev</h3>
+<p>To get us warmed up, let’s start with the Markov inequality:</p>
+
+<p><span class="theorem">
+For any non-negative random variable $X$, 
+\begin{align} \mathrm{P} \{ X \geq t \} \leq \frac{\mathrm {E} X}{t}\end{align}
+</span></p>
+
+<details>
+<summary>Proof. </summary>
+<div class="proof"> Let $(\Omega, \Sigma, \mathrm P)$ be a probability
+space.
+<!--- Cinlar --->
+
+$$
+\begin{align}
+\mathop{\mathrm E} X &amp;= \int X \, d\mathrm P  \\
+&amp;\geq  \int_{\{ X \geq t\}} X \, d\mathrm P\\ 
+&amp;\geq t \int_{\{ X \geq t\}} \, d\mathrm P \\ 
+&amp;\geq t \cdot \mathrm P \{ X \geq t \}
+\end{align}
+$$
+
+</div>
+</details>
+
+<p>This is often a very weak bound, as it does not use anything we know about the
+random variable $X$. But, it is used in the proof of every other bound in these notes, such as Chebyshev inequality,
+which uses the variance of $X$ to obtain a concentration bound.</p>
+<p><span class="theorem">
+For any random variable $X$, 
+\begin{align} \mathrm{P} \{ | X - \mathop{\mathrm E} X|  \geq t \} \leq \frac{\mathrm {Var} (X)}{t^2}\end{align}
+</span></p>
+
+<details>
+<summary>Proof. </summary>
+<div class="proof">
+We obtain Chebyshev inequality squaring both sides of $  |X - \mathop{\mathrm E} X| \geq t $ and applying the Markov inequality.
+
+\begin{align}
+\mathrm P \{ | X - \mathop{\mathrm E} X|^2 \geq t^2 \} &amp;\leq \frac{\mathop{\mathrm E} {\left| X - \mathop{\mathrm E} X \right| ^2}}{t^2} \\
+&amp;= \frac{\mathrm {Var}(X)}{ t^2}
+\end{align}
+</div>
+</details>
+
+<h3 id="hoeffdings-inequality">Hoeffding’s Inequality</h3>
+
+<p>Hoeffding is going to give us the exponential bound for the deviation $\sum_i
+X_i$ that we are looking for. To do so, it makes a crucial assumption:
+independence.</p>
+
+<p>To start off, we will prove a special case, where there variables $X_1,…,X_N$
+are symmetric Bernoulli. This means that they take the values 1 or -1 with
+equal probability.</p>
+<div class="theorem">
+If $X_1,...,X_N$ are symmetric Bernoulli random variables, and $a \in \mathrm R^N$, then for any $t \geq 0$, we have
+$$
+\mathrm{P} \left\{\sum_{i=1}^N a_i X_i \geq t \right\} \leq  \exp\left( - \frac{t^2}{2 \|a\|^2}\right)
+$$
+</div>
+<details>
+<summary>Proof. </summary>
+<div class="proof">
+
+\begin{align*}
+\mathrm{P} \left\{\sum_{i=1}^N a_i X_i \geq t \right\}  &amp; = \mathrm{P} \left\{\exp \left( \lambda \sum_{i=1}^N a_i X_i \right)\geq e^{\lambda t}  \right\} \\
+&amp; \leq e^{-\lambda t}\mathrm{E} \left\{\exp \left( \lambda \sum_{i=1}^N a_i X_i \right)  \right\}
+\end{align*}
+where Markov's inequality was used in the second step.
+
+Now, by independence:
+\begin{align*}
+\mathrm{E} \left\{\exp \left( \lambda \sum_{i=1}^N a_i X_i \right)  \right\} &amp;= \mathrm{E} \left\{\prod_{i=1}^N \exp(\lambda a_i X_i)\right\}\\
+&amp;= \prod_{i=1}^N \mathrm{E} \left\{\exp(\lambda a_i X_i)\right\}.
+\end{align*}
+And noting that $X_i$ takes -1 and 1 with probability $1/2$, we can easily compute its expectation as
+$$ \mathrm{E} \left\{\exp(\lambda a_i X_i)\right\}  = \frac{e^{\lambda a_i} + e^{-\lambda a_i}}{2} \leq e^{\lambda^2 a_i^2/2}.$$
+
+Because the Taylor series of the exponential,
+
+$$
+e^x = \sum_{k=0}^\infty \frac{x^k}{k!}\\
+\frac{e^x + e^{-x}}{2} = \sum_{k=0}^\infty \frac{x^{2k}}{(2k)!}\\
+e^{x^2/2} = \sum_{k=0}^\infty \frac{x^{2k}}{2^k (k!)}
+$$
+
+Therefore, $\frac{e^x + e^{-x}}{2} \leq  e^{x^2/2}$. 
+
+Now, we can plug into the product above, and assuming $\|a\|^2 = 1$:
+\begin{align*}
+\mathrm{P} \left\{\sum_{i=1}^N a_i X_i \geq t \right\}  &amp;\leq  e^{-\lambda t}\left( \prod_{i=1}^Ne^{\lambda^2 a_i^2/2}\right) \\ 
+&amp;\leq  e^{-\lambda t}\left( e^{\lambda^2 \sum_{i=1}^Na_i^2/2}\right) \\
+&amp;=  e^{-\lambda t}\left( e^{\lambda^2 /2}\right) \\
+&amp;=   e^{\lambda^2 /2 - \lambda t } \\
+\end{align*}
+
+This holds for any $\lambda$, and it is minimized by $\lambda = t$, so we obtain
+
+$$
+\mathrm{P} \left\{\sum_{i=1}^N a_i X_i \geq t \right\}  \leq e^{-t^2/2}
+$$
+
+Of course, by homogeneity, we have it for any $a$
+
+First, note that we can assume $\|a\| = 1$, because 
+
+$$
+\mathrm{P} \left\{\sum_{i=1}^N \frac{a_i}{\|a\|} X_i  \geq \frac{t}{\|a\|} \right\} \leq e^{-\frac{t^2}{2\|a\|^2}}   
+$$
+
+</div>
+</details>
+
+<p>With this theorem in hand, we can obtain bounds for our coin flipping problem.
+Let $Y_i = 2(X_i-\frac{1}{2})$, which is a symmetric binomial variable.</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+ \mathrm P \{ \sum_i X_i  > t \} &= \mathrm P \left\{ \sum_i \left(\frac{Y_i}{2} + \frac{1}{2}\right) > t \right\} \\
+&= \mathrm P \left\{ \sum_i Y_i>2t-N \right\} \\
+& \leq  \exp\left( - \frac{(2t-N)^2}{2 N}\right).\\
+\end{align*} %]]></script>
+
+<p>where the theorem was applied with $a = [1,1,…,1]$ so $\|a\|_{2}^2 = N$. So</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathrm P\left \{ \sum_i X_i  > \frac{3N}{4} \right\} & \leq  \exp\left( - \frac{(\frac{3N}{2}-N)^2}{2 N}\right).\\
+&= \exp\left( - \frac{N}{8}\right)
+\end{align*} %]]></script>
+
+<p>Simulating the coin flips, we see that Hoeffding’s Inequality gives the
+exponential bound that is observed from the simulation.</p>
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">patchwork</span><span class="p">)</span><span class="w"> </span><span class="c1"># devtools::install_github("thomasp85/patchwork")</span><span class="w">
+</span><span class="n">p</span><span class="o">=</span><span class="m">.5</span><span class="w">
+</span><span class="n">ns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">seq</span><span class="p">(</span><span class="n">from</span><span class="o">=</span><span class="m">10</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="m">100</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="o">=</span><span class="m">10</span><span class="p">))</span><span class="w">
+</span><span class="n">chebyshev_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">4</span><span class="o">/</span><span class="n">ns</span><span class="p">;</span><span class="w">
+</span><span class="n">hoeffding_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ns</span><span class="o">/</span><span class="m">8</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span><span class="n">empirical_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))</span><span class="w">
+</span><span class="n">test_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1E7</span><span class="p">;</span><span class="w">
+</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ni</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span><span class="w"> </span><span class="p">){</span><span class="w">
+  </span><span class="n">n</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ns</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w">
+  </span><span class="n">expvec</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rbinom</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span><span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="p">);</span><span class="w">
+  </span><span class="n">empirical_upper_bounds</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p">(</span><span class="nf">sum</span><span class="p">((</span><span class="w"> </span><span class="n">expvec</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">n</span><span class="o">*</span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">n</span><span class="o">/</span><span class="m">4</span><span class="w"> </span><span class="p">))</span><span class="o">/</span><span class="n">test_size</span><span class="p">;</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="n">toplot</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">ns</span><span class="p">),</span><span class="w"> </span><span class="n">probability</span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">empirical_upper_bounds</span><span class="p">,</span><span class="w"> </span><span class="n">chebyshev_upper_bounds</span><span class="p">,</span><span class="w"> </span><span class="n">hoeffding_upper_bounds</span><span class="p">),</span><span class="w">
+                     </span><span class="n">group</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Empirical"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)),</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Chebyshev"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)),</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Hoeffding"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))))</span><span class="w">
+</span><span class="n">g_linear</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">toplot</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">probability</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_line</span><span class="p">()</span><span class="w">  </span><span class="o">+</span><span class="n">xlab</span><span class="p">(</span><span class="s2">"N"</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w">
+</span><span class="n">g_log</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">toplot</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">probability</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_line</span><span class="p">()</span><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">scale_y_log10</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="n">xlab</span><span class="p">(</span><span class="s2">"N"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w">
+</span><span class="n">g</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">g_linear</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">g_log</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/concentration/concentration.png" alt="Concentration Inequalities for Binomial" /></p>
+
+<p>We can prove a slightly more general statement for any bounded random variable.</p>
+<div class="theorem">
+If $X_1,...,X_N$ are independent random variables, and $X_i \in [m_i,M_i]$ almost surely. Then for any $t&gt;0$,
+$$ 
+\mathrm{P} \left\{ \sum_{i=1}^N (X_i - \mathop{\mathrm E} X_i) \geq t \right\} \leq  \exp\left(- \frac{2 t^2}{\sum_{i=1}^N (M_i - m_i)^2}\right)
+$$
+</div>
+
+<summary>Proof. </summary>
+<details>
+<div class="proof">
+As before, we multiply by $\lambda$, exponentiate, and use Markov's inequality.
+
+$$
+\begin{align*}
+\mathrm P \left\{ \sum ( X_i - \mathop{\mathrm E} X_i) \geq t  \right\} &amp;= \mathrm P \left\{ \exp\left(\lambda \sum ( X_i - \mathop{\mathrm E} X_i)\right) \geq e^{\lambda t}  \right\}\\
+&amp;\leq  \mathop{\mathrm E} \left\{ \exp\left(\lambda \sum ( X_i - \mathop{\mathrm E} X_i)\right) \right\}e^{-\lambda t}  \\
+&amp;=  \prod_i \mathop{\mathrm E} \left\{ \exp\left(\lambda ( X_i - \mathop{\mathrm E} X_i)\right) \right\}e^{-\lambda t}  \\
+\end{align*}
+$$
+
+Now, we must bound that expectation. To do so, we use a technique called
+symmetrization, where we introduce an independent copy of $X_i$, which we call
+$X_i'$. Notably, $X_i'$ has the same distribution as $X_i$, and hence $\mathrm
+E X_i = \mathop{\mathrm E} X_i'$. We see that
+
+$$
+\begin{align*}
+\mathop{\mathrm E} \left\{ \exp\left(\lambda \sum ( X_i - \mathop{\mathrm E} X_i)\right) \right\} &amp;= \mathop{\mathrm E} \left\{ \exp\left(\lambda \sum ( X_i - \mathop{\mathrm E} X_i')\right) \right\}\\
+&amp;= \mathop{\mathrm E}_{X_i} \left\{ \exp\left(\mathop{\mathrm E}_{X_i'}\lambda \sum ( X_i -  X_i')\right) \right\}\\
+&amp;\leq \mathop{\mathrm E}_{X_i} \mathop{\mathrm E}_{X_i'}\left\{ \exp\left(\lambda \sum ( X_i -  X_i')\right) \right\}\\
+&amp;= \mathop{\mathrm E} \left\{ \exp\left(\lambda \sum ( X_i -  X_i')\right) \right\},
+\end{align*}
+$$
+where the last inequality is obtained by applying Jensen's inequality (because the exponential is convex).
+
+Interestingly, we note that $X_i - X_i'$ is symmetric around zero. In
+particular, its distribution is the same as $S(X_i - X_i')$, where $S$ is a
+Rademacher variable (a random sign variable that is 1 or -1 with equal
+probability). So, we have 
+
+$$
+\begin{align*}
+\mathop{\mathrm E} \left\{ \exp\left(\lambda \sum ( X_i - \mathop{\mathrm E} X_i)\right) \right\} &amp;= \mathop{\mathrm E}_{X_i,X_i'} \left\{ \mathop{\mathrm E}_S \exp\left(\lambda \sum S( X_i -  X_i')\right) \right\}\\
+&amp;\leq \mathop{\mathrm E}_{X_i,X_i'} \left\{ \exp(\lambda^2(X_i - X_i')^2/2)\right\}\\
+&amp;\leq  \exp(\lambda^2(M_i-m_i)^2/2)\\
+\end{align*}
+$$
+where the first inequality follows from the Taylor expansion of the exponential
+(exactly as in the proof above) and the second uses the boundedness of $X_i$.
+
+Now, plugging into our first inequality above,
+
+$$
+\begin{align*}
+\mathrm P \left\{ \sum ( X_i - \mathop{\mathrm E} X_i) \geq t  \right\} &amp;\leq  \prod_i \mathop{\mathrm E} \left\{ \exp\left(\lambda ( X_i - \mathop{\mathrm E} X_i)\right) \right\}e^{-\lambda t}  \\
+&amp;\leq  \prod_i\exp(\lambda^2(M_i-m_i)^2/2) e^{-\lambda t}  \\
+&amp;= \exp\left(\lambda^2\sum_i(M_i-m_i)^2/2-\lambda t\right)  \\
+&amp;\leq\exp\left(\frac{2t^2}{\sum_i(M_i-m_i)^2}\right),  \\
+\end{align*}
+$$
+
+where the last inequality chooses the $\lambda$ that minimizes the exponent.
+
+</div>
+</details>
+
+<p>Here is a nice exercise from Vershynin’s book that nicely demonstrates the utility of this inequality.</p>
+
+<div class="exercise">
+Suppose we have a binary classification problem,
+and a random algorithm that correctly classifies a datapoint with probability
+$\frac{1}{2}+\delta$, for $\delta &gt;0$. This is a random algorithm, so two runs
+are completely independent. A natural way to construct an improved classifier
+would be to run the algorithm $N$ times and take the majority vote. Suppose we
+decide that we want our algorithm to have only $\epsilon &gt;0$ probability of
+classifying incorrectly. What is the minimum number of times we need to run the
+algorithm?
+</div>
+<details>
+<summary>Solution. </summary>
+<div class="proof">
+We can model each run of the algorithm as a Bernoulli random variable $X_i$
+which is $1$ if incorrect (with probability $\frac{1}{2}-\delta$) and 0 if
+correct (with probability $\frac{1}{2} +\delta$).  In this formulation, we need to establish
+
+$$
+\mathrm{P} \left\{ \frac{1}{N} \sum_{i=1}^N X_i \geq \frac{1}{2} \right\} &lt; \epsilon.
+$$
+
+
+To solve this problem, we start by writing out Hoeffding's inequality:
+
+$$
+\mathrm{P} \left\{ \sum_{i=1}^N (X_i - \mathop{\mathrm E} X_i) \geq t \right\} \leq  \exp\left(- \frac{2 t^2}{N}\right)
+$$
+
+This holds for any $t$, so let's pick a $t$ that gives us the left hand side of our inequality.
+
+$$
+\begin{align*}
+\frac{1}{N} \sum_{i=1}^N \left( X_i - \mathop{\mathrm E} X_i \right) &amp;\geq \frac{t}{N}\\
+\frac{1}{N} \sum_{i=1}^N \left( X_i \right) &amp;\geq \frac{t}{N} + \mathop{\mathrm E} X_i \\
+&amp;= \frac{t}{N} + \frac{1}{2} - \delta
+\end{align*}
+$$
+
+We want the right hand side to be $ \frac{1}{2} $, so we choose $t = \delta N$ giving
+
+$$
+\mathrm{P} \left\{ \sum_{i=1}^N X_i  \geq \frac{1}{2} \right\} \leq  \exp\left(- 2 \delta^2N\right).
+$$
+
+We need to choose $N$ large enough such that $\exp\left(- 2 \delta^2N\right) &lt; \epsilon$. Solving for $N$,
+
+$$
+\begin{align*}
+\exp\left(- 2 \delta^2N\right) &amp;&lt; \epsilon\\
+- 2 \delta^2N &amp;&lt; \ln(\epsilon)\\
+N &amp;&gt; \frac{1}{2}\delta^{-2}\ln(\epsilon^{-1})
+\end{align*}
+$$
+
+For example, if we want 99% accuracy ($\epsilon = 0.01$), but $\delta = 0.05$, then we need to run the algorithm at least 20,000 times.
+</div>
+</details>
+
+<h2 id="chernoff-bounds">Chernoff Bounds</h2>
+<p>The Hoeffding bound for the Bernoulli random variable with $p=0.5$ was quite
+sharp. Let’s see what happens for small $p$. As before, let $X_i \sim
+\text{Bernoulli(p)}$ then $S_N = \sum_{i=1}^N X_i$. Suppose we need to bound the probability that $S_N &gt; 10pN$</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathrm P \left\{ \sum_i X_i  > 10pN \right\} &= \mathrm P\left \{ \sum_i X_i - pN > 9pN \right\}\\
+&\leq  \exp\left(- \frac{2(9pN)^2}{N}\right)\\
+&=  \exp\left(- 182p^2N\right)\\
+\end{align*} %]]></script>
+
+<p>This is a bound for the probability that the Binomial random variable deviates
+from its mean by more than 9 times the mean.  Intuitively, we would expect this
+to be highly improbable. Indeed, with $n=100$ and $p=0.5$, the bound above
+gives essentially zero. But with $p=0.01$, we get 0.2, which is completely useless! Hoeffding is just not
+enough for small $p$; we need something stronger.</p>
+
+<div class="theorem">
+If $X_1,...,X_N$ are independent Bernoulli random variables with parameters $p_i$. Let $S_N = \sum_i X_i$ and $\mu = \mathop{\mathrm E} S_N$ then for $t &gt; \mu$,
+$$ 
+\mathrm{P} \left\{ S_N \geq t \right\} \leq  \exp\left(- \mu \right) \left( \frac{e \mu}{t} \right)^t.
+$$
+</div>
+<details>
+<summary>Proof. </summary>
+<div class="proof">
+Again, we  multiply by $\lambda$, exponentiate, and use Markov's inequality.
+
+$$
+\begin{align*}
+\mathrm P \left\{ S_N \geq t  \right\} &amp;\leq  \mathop{\mathrm E} \left\{ \exp\left(\lambda \sum_i X_i \right) \right\}e^{-\lambda t}  \\
+&amp;=  \prod_i \mathop{\mathrm E} \left\{ \exp\left(\lambda X_i \right) \right\}e^{-\lambda t}  \\
+\end{align*}
+$$
+
+Now, we bound each expectation separately. We use the inequality $1+x \leq
+e^x$, which comes from noting that $1+x$ is the tangent of of $e^x$
+at 0, and $e^x$ is convex, so it must lie above its tangent lines.
+
+$$
+\begin{align*}
+E \left\{ \exp\left(\lambda X_i \right) \right\} &amp;= e^\lambda p_i + (1-p_i)\\
+&amp;= 1 + (e^\lambda -1)p_i \\
+&amp;\leq \exp \left( p_i (e^\lambda -1) \right) \\
+\end{align*}
+$$
+
+Which gives
+$$
+\begin{align*}
+\mathrm P \left\{ S_N \geq t  \right\} &amp;\leq  \prod_i \exp \left( p_i (e^\lambda -1) \right)e^{-\lambda t}  \\
+&amp;\leq  \exp \left((e^\lambda -1)\sum_i  p_i  \right)e^{-\lambda t}  \\
+&amp;\leq  \exp \left((e^\lambda -1)\mu  \right)e^{-\lambda t}  \\
+\end{align*}
+$$
+
+We are free to choose any $\lambda$ we like, so we substitute $\lambda = \ln(t/\mu)$, giving
+
+$$
+\begin{align*}
+\mathrm P \left\{ S_N \geq t  \right\} &amp;\leq  \exp \left((\frac{t}{\mu} -1)\mu  \right)\left( \frac{\mu}{t} \right)^t  \\
+&amp;=  \exp \left(t-\mu  \right)\left( \frac{\mu}{t} \right)^t  \\
+&amp;=  \exp \left(-\mu  \right)\left( \frac{e\mu}{t} \right)^t  \\
+\end{align*}
+$$
+
+
+
+</div>
+</details>
+
+<p>In our case, we have</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathrm P \left\{ \sum_i X_i  > 10pN \right\}  &\leq \exp(-pN) \left(\frac{epN}{10pN} \right)^{10pN}\\
+&= \exp(-pN) \left(\frac{e}{10} \right)^{10pN}\\
+
+\end{align*} %]]></script>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">require</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">patchwork</span><span class="p">)</span><span class="w"> </span><span class="c1"># devtools::install_github("thomasp85/patchwork")</span><span class="w">
+</span><span class="n">p</span><span class="o">=</span><span class="m">.01</span><span class="w">
+</span><span class="n">ns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">seq</span><span class="p">(</span><span class="n">from</span><span class="o">=</span><span class="m">10</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="m">100</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="o">=</span><span class="m">10</span><span class="p">))</span><span class="w">
+</span><span class="n">chernoff_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">*</span><span class="n">ns</span><span class="p">)</span><span class="o">*</span><span class="p">((</span><span class="nf">exp</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">/</span><span class="m">10</span><span class="p">))</span><span class="o">^</span><span class="p">(</span><span class="m">10</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">ns</span><span class="p">);</span><span class="w">
+</span><span class="n">hoeffding_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="m">2</span><span class="o">*</span><span class="p">(</span><span class="m">9</span><span class="o">*</span><span class="n">p</span><span class="p">)</span><span class="o">^</span><span class="m">2</span><span class="o">*</span><span class="n">ns</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span><span class="n">empirical_upper_bounds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))</span><span class="w">
+</span><span class="n">test_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5E7</span><span class="p">;</span><span class="w">
+</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ni</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span><span class="w"> </span><span class="p">){</span><span class="w">
+  </span><span class="n">n</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ns</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w">
+  </span><span class="n">expvec</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rbinom</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span><span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="p">);</span><span class="w">
+  </span><span class="n">empirical_upper_bounds</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p">(</span><span class="nf">sum</span><span class="p">(</span><span class="w"> </span><span class="n">expvec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">10</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="p">))</span><span class="o">/</span><span class="n">test_size</span><span class="p">;</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="n">toplot</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">ns</span><span class="p">),</span><span class="w"> </span><span class="n">probability</span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">empirical_upper_bounds</span><span class="p">,</span><span class="w"> </span><span class="n">chernoff_upper_bounds</span><span class="p">,</span><span class="w"> </span><span class="n">hoeffding_upper_bounds</span><span class="p">),</span><span class="w">
+                     </span><span class="n">group</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Empirical"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)),</span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Chernoff"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">)),</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="s2">"Hoeffding"</span><span class="p">,</span><span class="nf">length</span><span class="p">(</span><span class="n">ns</span><span class="p">))))</span><span class="w">
+</span><span class="n">g_linear</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">toplot</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">probability</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_line</span><span class="p">()</span><span class="w">  </span><span class="o">+</span><span class="n">xlab</span><span class="p">(</span><span class="s2">"N"</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w">
+</span><span class="n">g_log</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">toplot</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">probability</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="n">group</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_line</span><span class="p">()</span><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">scale_y_log10</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="n">xlab</span><span class="p">(</span><span class="s2">"N"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> </span><span class="n">legend.position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bottom"</span><span class="p">)</span><span class="w">
+</span><span class="n">g</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">g_linear</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">g_log</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/~gcl22/blog/assets/concentration/chernoff.png" alt="Chernoff" /></p>
+
+<p>Now this is much better! By taking into account the means of $X_i$, we get a
+much tighter bound when those means are very small.</p>
+
+<h2 id="final-notes">Final Notes</h2>
+<p>The primary reference for these notes is Prof. Roman Vershynin’s <a href="https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.html">High
+Dimensional
+Probability</a>,
+which I highly recommend. I also found <a href="http://cs229.stanford.edu/extra-notes/hoeffding.pdf">these
+notes</a> by Prof. John Duchi
+to be helpful. Also many thanks to Prof. Stefan Steinerberger and Prof. John
+Lafferty whose classes got me first interested in the topic.</p>
+
+<p>These notes focused on sums of Bernoulli variables, but the field of
+concentration inequalities is remarkably deep. For example, please see Vershynin’s book for
+extensions of these inequalities for sub-Gaussian and sub-Exponential variables,
+which I did not write about here. Also, please contact me (Twitter or Email) for comments or questions!</p>
+
+<!---
+# Subgaussian
+
+<div class="exercise">
+Prove that the $\psi_2$ norm obeys the triangle inequality.
+</div>
+<details>
+<summary>Solution.</summary>
+<div class="proof">
+ For sub-Gaussian variables $X,Y$, suppose $t_1 = \|X\|_{\psi_2}$ and  $t_2 =
+\|Y\|_{\psi_2}$. Need to show that $\|Y+X\|_{\psi_2} \leq \|X\|_{\psi_2} +
+\|Y\|_{\psi_2}$, so it is sufficient to show that $\mathop{\mathrm E} \exp\left(\frac{X+Y}{t_1+t_2}\right)^2 \leq 2$.  By convexity,
+$$
+\begin{align*}
+\mathop{\mathrm E} \exp\left(\frac{X+Y}{t_1+t_2}\right)^2 &=  \mathop{\mathrm E} \exp\left(\frac{t_1}{t_1+t_2}\frac{X}{t_1} + \frac{t_2}{t_1+t_2}\frac{X}{t_2}\right)^2\\
+ &\leq  \mathop{\mathrm E} \frac{t_1}{t_1+t_2}\exp\left(\frac{X}{t_1} \right)^2+ \frac{t_2}{t_1+t_2}\exp\left(\frac{X}{t_2}\right)^2\\
+&\leq 2
+\end{align*}
+$$
+</div>
+</details>
+
+
+# Examples
+Consider a $N$ flips of a coin with probability $p$ of landing heads and
+$(1-p)$ of landing tails. Let $X_i \sim \text{Bernoulli(p)}$ be the result of a
+given coin flip (1 if heads, 0 if tails), and $S_N$ be the number of heads $S_N
+= \sum_{i=1}^N S_N \sim \text{Binomial}(N,0.5)$. Of course, the mean of $S_N$ is $Np$ and the variance is $Np(1-p)$. 
+---->
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/~gcl22/blog/"></data>
+
+  <div class="wrapper">
+
+	  <!-- <h2 class="footer-heading">Aesculapian Mathematics</h2> --->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">
+            
+              George C. Linderman
+            
+            </li>
+            
+            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+          <li>
+            <a href="https://twitter.com/gclinderman"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">gclinderman</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
