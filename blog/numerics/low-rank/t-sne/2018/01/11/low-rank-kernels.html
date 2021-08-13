@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
+<html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>Low Rank Approximation of Kernels</title>
-  <meta name="description" content="">
-
-  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html">
-  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
-  
-  
-</head>
-
-
-  <body>
-
-    <header class="site-header" role="banner">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Low Rank Approximation of Kernels | Aesculapian Mathematics</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Low Rank Approximation of Kernels" />
+<meta name="author" content="George C. Linderman" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://0.0.0.0:4000/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" />
+<meta property="og:site_name" content="Aesculapian Mathematics" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-01-11T00:00:00-06:00" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"George C. Linderman"},"dateModified":"2018-01-11T00:00:00-06:00","datePublished":"2018-01-11T00:00:00-06:00","headline":"Low Rank Approximation of Kernels","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html"},"url":"http://0.0.0.0:4000/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/blog/feed.xml" title="Aesculapian Mathematics" /></head>
+<body><header class="site-header" role="banner">
 
   <div class="wrapper">
     
     
-    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+    <!---    <a class="site-title" rel="author" href="/blog/">Aesculapian Mathematics</a> --->
 
     
       <nav class="site-nav">
@@ -40,7 +38,7 @@
         </label>
 
         <div class="trigger">
-            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+            <a class="page-link" href="https://gclinderman.github.io/">Homepage</a>
 		<!---
           
             
@@ -48,7 +46,7 @@
           
             
             
-            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            <a class="page-link" href="/blog/about/">About</a>
             
           
             
@@ -69,26 +67,21 @@
     
   </div>
 </header>
-
-
-    <main class="page-content" aria-label="Content">
+<main class="page-content" aria-label="Content">
       <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Low Rank Approximation of Kernels</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Low Rank Approximation of Kernels</h1>
     <p class="post-meta">
-      <time datetime="2018-01-11T00:00:00-05:00" itemprop="datePublished">
-        
-        Jan 11, 2018
-      </time>
-      </p>
+      <time class="dt-published" datetime="2018-01-11T00:00:00-06:00" itemprop="datePublished">Jan 11, 2018
+      </time></p>
   </header>
 
-  <div class="post-content" itemprop="articleBody">
-    <link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+  <div class="post-content e-content" itemprop="articleBody">
+    <link rel="stylesheet" href="/blog/assets/css/latex_macros.css" />
 
-<link rel="stylesheet" href="/~gcl22/blog/assets/css/style.css" />
+<link rel="stylesheet" href="/blog/assets/css/style.css" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-111570395-1"></script>
@@ -187,7 +180,7 @@ that for near field interactions, it is not low rank.</p>
 <span class="p">[</span><span class="n">locs</span><span class="p">,</span><span class="o">~</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sort</span><span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">));</span>
 <span class="n">distmatrix</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">locs</span><span class="p">));</span>
 <span class="n">kernel1</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="n">distmatrix</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span> 
-<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="n">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="nb">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 
 <span class="p">[</span><span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">V1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel1</span><span class="p">);</span> 
@@ -198,7 +191,7 @@ that for near field interactions, it is not low rank.</p>
 <span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Spectra of Kernels: Neear Field Interactions'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p><img src="/~gcl22/blog/assets/low-rank-kernels/spectra.png" alt="Spectra" /></p>
+<p><img src="/blog/assets/low-rank-kernels/spectra.png" alt="Spectra" /></p>
 
 <p>Note how the singular values of $K_1$ decay immediately to zero, whereas $K_2$ decays from $10^{12}$
 to $10^9$. This is what we mean by low-rank kernel: the matrix $K$ is a linear
@@ -232,7 +225,7 @@ USV^Tq - f\|/\|f\|$ for both of these kernels as a function of $k$.</p>
 <span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> 
 </code></pre></div></div>
 
-<p><img src="/~gcl22/blog/assets/low-rank-kernels/svd_error.png" alt="Optimal error" /></p>
+<p><img src="/blog/assets/low-rank-kernels/svd_error.png" alt="Optimal error" /></p>
 
 <p>With &lt;20 vectors, we can approximate $K_1$ to machine precision, but not the
 case for $K_2$, we can only get about 3 digits, which can be seen by taking the
@@ -250,7 +243,7 @@ then $K_2$ is also low rank.</p>
 
 <span class="n">distmatrix</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">([</span><span class="n">locs1</span><span class="p">;</span> <span class="n">locs2</span><span class="p">]));</span>
 <span class="n">kernel1</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="n">distmatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1001</span><span class="p">:</span><span class="mi">2000</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span> 
-<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1001</span><span class="p">:</span><span class="mi">2000</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="n">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">kernel2</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">/(</span><span class="n">distmatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1001</span><span class="p">:</span><span class="mi">2000</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span><span class="n">kernel2</span><span class="p">(</span><span class="n">kernel2</span><span class="o">==</span><span class="nb">Inf</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 <span class="p">[</span><span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">V1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel1</span><span class="p">);</span> 
 <span class="p">[</span><span class="n">U2</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">V2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">kernel2</span><span class="p">);</span> 
@@ -260,7 +253,7 @@ then $K_2$ is also low rank.</p>
 <span class="nb">semilogy</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">S2</span><span class="p">),</span> <span class="s1">'linewidth'</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span><span class="c1">%xlim([0,500]);</span>
 <span class="nb">legend</span><span class="p">(</span><span class="s1">'K_1'</span><span class="p">,</span> <span class="s1">'K_2'</span><span class="p">);</span> <span class="nb">title</span><span class="p">(</span><span class="s1">'Spectrum of kernels'</span><span class="p">);</span> <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'FontSize'</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div></div>
-<p><img src="/~gcl22/blog/assets/low-rank-kernels/spectra_well_sep.png" alt="Optimal error well separated" /></p>
+<p><img src="/blog/assets/low-rank-kernels/spectra_well_sep.png" alt="Optimal error well separated" /></p>
 
 <p>If we were interested in approximating $K_2$, then we could use a fast
 multipole method (FMM), which treats the interaction between points close to
@@ -374,9 +367,9 @@ q_n
 
     <span class="c1">%We only evaluate the kernel at the k by k interpolation points</span>
     <span class="n">S</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">);</span>
-    <span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
-        <span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>       
-            <span class="n">S</span><span class="p">(</span><span class="nb">i</span><span class="p">,</span><span class="nb">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">i</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+        <span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>       
+            <span class="n">S</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="n">i</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
         <span class="k">end</span>
     <span class="k">end</span>
     
@@ -393,7 +386,7 @@ q_n
 </code></pre></div></div>
 
 <p>Note that the matrix $V$ is entirely independent of the kernel. As you can see below, the error decreases, but as discussed above, SVD is better.
-<img src="/~gcl22/blog/assets/low-rank-kernels/poly_vs_svd.png" alt="Optimal error" /></p>
+<img src="/blog/assets/low-rank-kernels/poly_vs_svd.png" alt="Optimal error" /></p>
 
 <p>Remarkably, the error is independent of the number of points $n$. And
 most importantly, it does not require formation of the matrix $K$, so it can be
@@ -414,17 +407,17 @@ points within its interval. The key point here is that because we are
 interpolating on small intervals, we can achieve machine precision, with small
 $k$.</p>
 
-<p><img src="/~gcl22/blog/assets/low-rank-kernels/lagrange_subintervals.png" alt="Lagrange Polynomial Interpolation with Subintervals" />
+<p><img src="/blog/assets/low-rank-kernels/lagrange_subintervals.png" alt="Lagrange Polynomial Interpolation with Subintervals" />
 To see how this works, let’s
 visualize the resulting $V$ and $S$ matrices, with $N_{int}=5$ and $k=3$.</p>
 
-<p><img src="/~gcl22/blog/assets/low-rank-kernels/subintervals_v.png" alt="V matrix" /></p>
+<p><img src="/blog/assets/low-rank-kernels/subintervals_v.png" alt="V matrix" /></p>
 
 <p>Take a look at the first 200 rows of $V$, and notice how only the first
 three columns are nonzero? These are the Lagrange polynomials corresponding to the
 $k=3$ interpolation points of the first interval evaluated at the ~200 points
 in that interval. In other words, the whole interval is represented by just those three points. And the same for all the other 4 intervals.
-<img src="/~gcl22/blog/assets/low-rank-kernels/subintervals_s.png" alt="S matrix" /></p>
+<img src="/blog/assets/low-rank-kernels/subintervals_s.png" alt="S matrix" /></p>
 
 <p>Now, $S$ contains all the interactions between all the nodes (across all
 intervals), that’s why it is $kN_{int} \times kN_{int}$. So, $V^T$ “sends”
@@ -439,20 +432,20 @@ sends them back to the original points!</p>
 
 <span class="c1">%k interpolation points in each interval</span>
 <span class="n">interp_points</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">Nint</span><span class="p">);</span>
-<span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+<span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
     <span class="k">for</span> <span class="n">int</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
-        <span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">,</span><span class="n">int</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span><span class="p">/</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="nb">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">int</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">h</span><span class="p">;</span>
+        <span class="n">interp_points</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">int</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span><span class="p">/</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">int</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">h</span><span class="p">;</span>
     <span class="k">end</span>
 <span class="k">end</span>
 
 <span class="c1">%We need to be able to look up which interval each point belongs to</span>
 <span class="n">int_lookup</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
 <span class="n">current_int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="n">current_int</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">locs</span><span class="p">(</span><span class="nb">i</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="n">current_int</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">locs</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         <span class="n">current_int</span> <span class="o">=</span> <span class="n">current_int</span> <span class="o">+</span><span class="mi">1</span><span class="p">;</span>
     <span class="k">end</span>
-   <span class="n">int_lookup</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">current_int</span><span class="p">;</span>
+   <span class="n">int_lookup</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">current_int</span><span class="p">;</span>
 <span class="k">end</span>
 
 <span class="c1">%Make V, which is now n rows by Nint*k columns</span>
@@ -476,10 +469,10 @@ sends them back to the original points!</p>
 <span class="c1">%Make S, which is k*Nint by k*Nint</span>
 <span class="n">S</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">Nint</span><span class="p">,</span><span class="n">k</span><span class="o">*</span><span class="n">Nint</span><span class="p">);</span>
 <span class="k">for</span> <span class="n">int1</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
-    <span class="k">for</span> <span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>
         <span class="k">for</span> <span class="n">int2</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nint</span>
-            <span class="k">for</span> <span class="nb">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>    
-                <span class="n">S</span><span class="p">((</span><span class="n">int1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="nb">i</span><span class="p">,(</span><span class="n">int2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="nb">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">i</span><span class="p">,</span><span class="n">int1</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="nb">j</span><span class="p">,</span><span class="n">int2</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+            <span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span>    
+                <span class="n">S</span><span class="p">((</span><span class="n">int1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="n">i</span><span class="p">,(</span><span class="n">int2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">/(</span><span class="mi">1</span><span class="o">+</span><span class="nb">norm</span><span class="p">(</span><span class="n">interp_points</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">int1</span><span class="p">)</span><span class="o">-</span><span class="n">interp_points</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">int2</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
             <span class="k">end</span>
         <span class="k">end</span>
     <span class="k">end</span>
@@ -532,9 +525,9 @@ Hoskins</a>, from whom I learned most of this material.</p>
 	<p style="font-style: italic">
 		All comments are held for moderation; basic HTML formatting accepted.
 	</p>
-	<form id="commentform" method="POST" action="/~gcl22/blog/cm/commentsubmit.php">
+	<form id="commentform" method="POST" action="/blog/cm/commentsubmit.php">
 		<input type="hidden" name="post_id" value="/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels" />
-		<input type="hidden" name="return_url" value="/~gcl22/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" />
+		<input type="hidden" name="return_url" value="/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" />
 		<table>
 			<tr>
 				<th>Name:</th>
@@ -559,16 +552,12 @@ Hoskins</a>, from whom I learned most of this material.</p>
 </div>
 --->
 
-  </div>
-
-  
+  </div><a class="u-url" href="/blog/numerics/low-rank/t-sne/2018/01/11/low-rank-kernels.html" hidden></a>
 </article>
 
       </div>
-    </main>
-
-    <footer class="site-footer h-card">
-  <data class="u-url" href="/~gcl22/blog/"></data>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
 
   <div class="wrapper">
 
@@ -583,7 +572,7 @@ Hoskins</a>, from whom I learned most of this material.</p>
             
             </li>
             
-            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            <li><a class="u-email" href="mailto:glinderman[at]mgh.harvard.edu">glinderman[at]mgh.harvard.edu</a></li>
             
         </ul>
       </div>
@@ -610,8 +599,6 @@ Hoskins</a>, from whom I learned most of this material.</p>
   </div>
 
 </footer>
-
-
-  </body>
+</body>
 
 </html>

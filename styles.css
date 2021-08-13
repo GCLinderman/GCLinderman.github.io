@@ -28,6 +28,9 @@ overflow:hidden; /*visually hide what doesn't fit 1x1 px*/
 ul {
 list-style-type: none; padding-left: 0;
 }
+ul.papers {
+list-style-type: disc; padding-left: 40px;
+}
 li {
 	margin: 10px 0;
 }

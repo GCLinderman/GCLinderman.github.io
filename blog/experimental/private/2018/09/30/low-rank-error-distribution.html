@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
+<html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>Low rank matrix error distributions</title>
-  <meta name="description" content="">
-
-  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/experimental/private/2018/09/30/low-rank-error-distribution.html">
-  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
-  
-  
-</head>
-
-
-  <body>
-
-    <header class="site-header" role="banner">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Low rank matrix error distributions | Aesculapian Mathematics</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Low rank matrix error distributions" />
+<meta name="author" content="George C. Linderman" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://0.0.0.0:4000/blog/experimental/private/2018/09/30/low-rank-error-distribution.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/blog/experimental/private/2018/09/30/low-rank-error-distribution.html" />
+<meta property="og:site_name" content="Aesculapian Mathematics" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-09-30T00:58:45-05:00" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"George C. Linderman"},"dateModified":"2018-09-30T00:58:45-05:00","datePublished":"2018-09-30T00:58:45-05:00","headline":"Low rank matrix error distributions","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/blog/experimental/private/2018/09/30/low-rank-error-distribution.html"},"url":"http://0.0.0.0:4000/blog/experimental/private/2018/09/30/low-rank-error-distribution.html","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/blog/feed.xml" title="Aesculapian Mathematics" /></head>
+<body><header class="site-header" role="banner">
 
   <div class="wrapper">
     
     
-    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+    <!---    <a class="site-title" rel="author" href="/blog/">Aesculapian Mathematics</a> --->
 
     
       <nav class="site-nav">
@@ -40,7 +38,7 @@
         </label>
 
         <div class="trigger">
-            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+            <a class="page-link" href="https://gclinderman.github.io/">Homepage</a>
 		<!---
           
             
@@ -48,7 +46,7 @@
           
             
             
-            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            <a class="page-link" href="/blog/about/">About</a>
             
           
             
@@ -69,23 +67,18 @@
     
   </div>
 </header>
-
-
-    <main class="page-content" aria-label="Content">
+<main class="page-content" aria-label="Content">
       <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Low rank matrix error distributions</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Low rank matrix error distributions</h1>
     <p class="post-meta">
-      <time datetime="2018-09-30T01:58:45-04:00" itemprop="datePublished">
-        
-        Sep 30, 2018
-      </time>
-      </p>
+      <time class="dt-published" datetime="2018-09-30T00:58:45-05:00" itemprop="datePublished">Sep 30, 2018
+      </time></p>
   </header>
 
-  <div class="post-content" itemprop="articleBody">
+  <div class="post-content e-content" itemprop="articleBody">
     <script type="text/javascript" src="https://livejs.com/live.js"></script>
 
 <script type="text/x-mathjax-config">
@@ -97,7 +90,7 @@ MathJax.Hub.Config({
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
-<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+<link rel="stylesheet" href="/blog/assets/css/latex_macros.css" />
 
 <style>
 
@@ -151,7 +144,7 @@ original zeros. Below, I do it for ten replicates, but plot only the first four.
 <span class="c1">%zeros, and repeating until the matrix is large enough.</span>
 <span class="n">ni</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">true_zeros_means</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="nb">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">ni</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">ni</span><span class="p">)</span>
 <span class="n">m</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">;</span> <span class="n">n</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">;</span> <span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>  <span class="n">C</span><span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="n">factor_sparsity</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">;</span>
 <span class="n">M_original</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
@@ -180,11 +173,11 @@ original zeros. Below, I do it for ten replicates, but plot only the first four.
 <span class="p">[</span><span class="n">U</span> <span class="n">S</span> <span class="n">V</span><span class="p">]</span> <span class="o">=</span> <span class="nb">svd</span><span class="p">(</span><span class="n">M_missing</span><span class="p">);</span>
 <span class="n">M_approx</span> <span class="o">=</span> <span class="n">U</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">S</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">V</span><span class="p">(:,</span><span class="mi">1</span><span class="p">:</span><span class="n">r</span><span class="p">)</span><span class="o">'</span><span class="p">;</span>
 
-<span class="n">true_zeros_means</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">=</span> <span class="nb">mean</span><span class="p">(</span><span class="n">M_approx</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span><span class="p">));</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nb">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> 
-        <span class="nb">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="nb">i</span><span class="p">);</span>
+<span class="n">true_zeros_means</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="nb">mean</span><span class="p">(</span><span class="n">M_approx</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> 
+        <span class="nb">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">);</span>
         <span class="nb">histogram</span><span class="p">(</span><span class="n">M_approx</span><span class="p">(</span><span class="n">M_original</span><span class="o">==</span><span class="mi">0</span> <span class="p">));</span> 
-        <span class="nb">title</span><span class="p">(</span><span class="nb">sprintf</span><span class="p">(</span><span class="s1">'%d x %d matrix, from %.2f to %.2f nnz\nmean %.4f'</span><span class="p">,</span><span class="n">m_final</span><span class="p">,</span><span class="n">n_final</span><span class="p">,</span><span class="nb">nnz</span><span class="p">(</span><span class="n">M_original</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span> <span class="nb">nnz</span><span class="p">(</span><span class="n">M_missing</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span><span class="n">true_zeros_means</span><span class="p">(</span><span class="nb">i</span><span class="p">)))</span>
+        <span class="nb">title</span><span class="p">(</span><span class="nb">sprintf</span><span class="p">(</span><span class="s1">'%d x %d matrix, from %.2f to %.2f nnz\nmean %.4f'</span><span class="p">,</span><span class="n">m_final</span><span class="p">,</span><span class="n">n_final</span><span class="p">,</span><span class="nb">nnz</span><span class="p">(</span><span class="n">M_original</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span> <span class="nb">nnz</span><span class="p">(</span><span class="n">M_missing</span><span class="p">)/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">),</span><span class="n">true_zeros_means</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
         <span class="nb">set</span><span class="p">(</span><span class="nb">gca</span><span class="p">,</span><span class="s1">'fontsize'</span><span class="p">,</span> <span class="mi">12</span><span class="p">);</span>
 
     <span class="k">end</span>
@@ -192,7 +185,7 @@ original zeros. Below, I do it for ten replicates, but plot only the first four.
 
 </code></pre></div></div>
 
-<p><img src="/~gcl22/blog/assets/low-rank-error/general_n1000_r10.png" alt="" /></p>
+<p><img src="/blog/assets/low-rank-error/general_n1000_r10.png" alt="" /></p>
 
 <p>It looks quite symmetric around zero. You might also note that the shape of the
 distribution is not a Gaussian–it is very pointy. I thought it sort of looked
@@ -260,7 +253,7 @@ something easier to prove?</p>
 <span class="k">end</span>
 
 </code></pre></div></div>
-<p><img src="/~gcl22/blog/assets/low-rank-error/individual_rows.png" alt="" /></p>
+<p><img src="/blog/assets/low-rank-error/individual_rows.png" alt="" /></p>
 
 <p>You can see how thresholding based on the smallest number can give you &lt;1% error</p>
 
@@ -268,7 +261,7 @@ something easier to prove?</p>
 
 <p>Boaz constructed a rank-3 example,</p>
 
-<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_true.png" alt="" /></p>
+<p><img src="/blog/assets/low-rank-error/boaz_true.png" alt="" /></p>
 
 <p>with the following code, which I modified to be a bit more random</p>
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -326,7 +319,7 @@ something easier to prove?</p>
 </code></pre></div></div>
 
 <p>When looking at the error distributions for zeros in the entire matrix (as above), we see that it is nicely symmetric…and that the mean is actually slightly less than zero.
-<img src="/~gcl22/blog/assets/low-rank-error/boaz_distribution.png" alt="" /></p>
+<img src="/blog/assets/low-rank-error/boaz_distribution.png" alt="" /></p>
 
 <p>So, using a global threshold (i.e. not row-specific) with this matrix would
 work just fine; it would restore the zeros.</p>
@@ -343,7 +336,7 @@ disastrous.</p>
 end
 
 </code></pre>
-<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_first_10.png" alt="" /></p>
+<p><img src="/blog/assets/low-rank-error/boaz_first_10.png" alt="" /></p>
 
 <p>So, if you try to threshold on each row, you do very poorly:</p>
 <pre><code class="language-MATLAB">mins = repmat(min(Xr,[],2), 1,p);
@@ -355,7 +348,7 @@ sum(X == 0 &amp; Xrt ~=0)/sum(X==0)
 column-specific distribution of
 zero errors:</p>
 
-<p><img src="/~gcl22/blog/assets/low-rank-error/boaz_first_10_cols.png" alt="" /></p>
+<p><img src="/blog/assets/low-rank-error/boaz_first_10_cols.png" alt="" /></p>
 
 <p>Indeed, if you now threshold on each column, you do much better:</p>
 
@@ -376,16 +369,12 @@ works. It might be best to first focus  on global thresholding, which works fine
 both of the above examples.</p>
 
 
-  </div>
-
-  
+  </div><a class="u-url" href="/blog/experimental/private/2018/09/30/low-rank-error-distribution.html" hidden></a>
 </article>
 
       </div>
-    </main>
-
-    <footer class="site-footer h-card">
-  <data class="u-url" href="/~gcl22/blog/"></data>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
 
   <div class="wrapper">
 
@@ -400,7 +389,7 @@ both of the above examples.</p>
             
             </li>
             
-            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            <li><a class="u-email" href="mailto:glinderman[at]mgh.harvard.edu">glinderman[at]mgh.harvard.edu</a></li>
             
         </ul>
       </div>
@@ -427,8 +416,6 @@ both of the above examples.</p>
   </div>
 
 </footer>
-
-
-  </body>
+</body>
 
 </html>

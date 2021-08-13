@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
+<html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>Matrix Completion</title>
-  <meta name="description" content="">
-
-  <link rel="stylesheet" href="/~gcl22/blog/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/~gcl22/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html">
-  <link rel="alternate" type="application/rss+xml" title="Aesculapian Mathematics" href="/~gcl22/blog/feed.xml">
-  
-  
-</head>
-
-
-  <body>
-
-    <header class="site-header" role="banner">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Matrix Completion | Aesculapian Mathematics</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Matrix Completion" />
+<meta name="author" content="George C. Linderman" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://0.0.0.0:4000/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html" />
+<meta property="og:site_name" content="Aesculapian Mathematics" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-07-08T00:00:00-05:00" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"George C. Linderman"},"dateModified":"2018-07-08T00:00:00-05:00","datePublished":"2018-07-08T00:00:00-05:00","headline":"Matrix Completion","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html"},"url":"http://0.0.0.0:4000/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/blog/feed.xml" title="Aesculapian Mathematics" /></head>
+<body><header class="site-header" role="banner">
 
   <div class="wrapper">
     
     
-    <!---    <a class="site-title" rel="author" href="/~gcl22/blog/">Aesculapian Mathematics</a> --->
+    <!---    <a class="site-title" rel="author" href="/blog/">Aesculapian Mathematics</a> --->
 
     
       <nav class="site-nav">
@@ -40,7 +38,7 @@
         </label>
 
         <div class="trigger">
-            <a class="page-link" href="http://gauss.math.yale.edu/~gcl22/">Homepage</a>
+            <a class="page-link" href="https://gclinderman.github.io/">Homepage</a>
 		<!---
           
             
@@ -48,7 +46,7 @@
           
             
             
-            <a class="page-link" href="/~gcl22/blog/about/">About</a>
+            <a class="page-link" href="/blog/about/">About</a>
             
           
             
@@ -69,23 +67,18 @@
     
   </div>
 </header>
-
-
-    <main class="page-content" aria-label="Content">
+<main class="page-content" aria-label="Content">
       <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Matrix Completion</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Matrix Completion</h1>
     <p class="post-meta">
-      <time datetime="2018-07-08T01:00:00-04:00" itemprop="datePublished">
-        
-        Jul 8, 2018
-      </time>
-      </p>
+      <time class="dt-published" datetime="2018-07-08T00:00:00-05:00" itemprop="datePublished">Jul 8, 2018
+      </time></p>
   </header>
 
-  <div class="post-content" itemprop="articleBody">
+  <div class="post-content e-content" itemprop="articleBody">
     <!-- <script type="text/javascript" src="http://livejs.com/live.js"></script> -->
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-111570395-1"></script>
@@ -107,9 +100,9 @@ MathJax.Hub.Config({
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
-<link rel="stylesheet" href="/~gcl22/blog/assets/css/latex_macros.css" />
+<link rel="stylesheet" href="/blog/assets/css/latex_macros.css" />
 
-<link rel="stylesheet" href="/~gcl22/blog/assets/css/style.css" />
+<link rel="stylesheet" href="/blog/assets/css/style.css" />
 
 <style>
 
@@ -326,7 +319,7 @@ where the contour line is $g=c$ is just
 “kisssing” (<a href="https://commons.wikimedia.org/wiki/File:LagrangeMultipliers2D.svg">source</a>)
 a contour line of $f$:</p>
 
-<center> <img src="/~gcl22/blog/assets/matrix-completion/LagrangeMultipliers.png" alt="Lagrange Multiplier illustration" style="width:400px;" /> </center>
+<center> <img src="/blog/assets/matrix-completion/LagrangeMultipliers.png" alt="Lagrange Multiplier illustration" style="width:400px;" /> </center>
 
 <p>At such a point, there are no feasible points for which
 $f$ is any smaller…otherwise the tangents would not
@@ -373,7 +366,7 @@ optimization.</p>
 
 <p>In 1D, the picture (<a href="https://en.wikipedia.org/wiki/Subderivative#/media/File:Subderivative_illustration.png">source</a>) is especially clear:</p>
 
-<center> <img src="/~gcl22/blog/assets/matrix-completion/Subderivative_illustration.png" alt="Subderivative" style="width:400px;" /> </center>
+<center> <img src="/blog/assets/matrix-completion/Subderivative_illustration.png" alt="Subderivative" style="width:400px;" /> </center>
 
 <p><br /> 
 The red lines are subgradients of the function (blue) at a point $x_0$ where $f$ is not differentiable.</p>
@@ -510,7 +503,7 @@ constraint in P1 (i.e. the feasible set). P1 successfully recovers the true
 matrix $M$ when every other matrix on this line has a larger nuclear norm. We
 can visualize this scenario in the 3-dimensional space defined above.</p>
 
-<p><img src="/~gcl22/blog/assets/matrix-completion/3x3_demo.png" alt="Demo 3 by 3" /></p>
+<p><img src="/blog/assets/matrix-completion/3x3_demo.png" alt="Demo 3 by 3" /></p>
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">% Let the true matrix be a rank-1 3 by 3 matrix of 1s. Suppose we sample</span>
 <span class="c1">% all but its upper right corner.</span>
 <span class="n">M</span> <span class="o">=</span> <span class="nb">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
@@ -594,7 +587,7 @@ M = \begin{bmatrix}
 
 <p>Note that this is still a rank-1 matrix, but it is more “coherent.” Here is the same visualization:</p>
 
-<p><img src="/~gcl22/blog/assets/matrix-completion/3x3_demo2.png" alt="Demo 3 by 3" /></p>
+<p><img src="/blog/assets/matrix-completion/3x3_demo2.png" alt="Demo 3 by 3" /></p>
 
 <p>Note how there are feasible solutions with smaller $\ell_1$ norm of the
 coefficients in this subspace than $M$. This suggests that the matrix is not
@@ -772,16 +765,12 @@ mathematical statistics.</p>
 </ol>
 
 
-  </div>
-
-  
+  </div><a class="u-url" href="/blog/statistics/probability/matrix/completion/2018/07/08/matrix-completion.html" hidden></a>
 </article>
 
       </div>
-    </main>
-
-    <footer class="site-footer h-card">
-  <data class="u-url" href="/~gcl22/blog/"></data>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
 
   <div class="wrapper">
 
@@ -796,7 +785,7 @@ mathematical statistics.</p>
             
             </li>
             
-            <li><a class="u-email" href="mailto:george.linderman[at]yale.edu">george.linderman[at]yale.edu</a></li>
+            <li><a class="u-email" href="mailto:glinderman[at]mgh.harvard.edu">glinderman[at]mgh.harvard.edu</a></li>
             
         </ul>
       </div>
@@ -823,8 +812,6 @@ mathematical statistics.</p>
   </div>
 
 </footer>
-
-
-  </body>
+</body>
 
 </html>
